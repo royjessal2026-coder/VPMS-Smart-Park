@@ -98,6 +98,2215 @@
 
             <!-- Right Login / Signup Forms -->
             <div class="lg:col-span-7 p-6 sm:p-10 flex flex-col justify-center">
+                <div class="mb-6">
+                    <span class="inline-flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
+                        <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Authorized Access Portal
+                    </span>
+                    <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900 mt-2">Sign In to SmartFleet VPMS</h2>
+                    <p class="text-xs text-slate-500 mt-0.5">Select User Login or Admin Login below, or enter your assigned credentials.</p>
+                </div>
+
+                <!-- LOGIN FORM (ONLY USER LOGIN & ADMIN LOGIN) -->
+                <form id="form-login" onsubmit="handleLogin(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Email Address</label>
+                        <input type="email" id="login-email" required placeholder="user@smartfleet.services" class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Password</label>
+                        <input type="password" id="login-password" required placeholder="••••••••" class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+
+                    <button type="submit" class="w-full py-3 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm shadow-md transition flex items-center justify-center gap-2">
+                        <i data-lucide="log-in" class="w-4 h-4 text-emerald-400"></i>
+                        <span>Login to SmartFleet VPMS</span>
+                    </button>
+
+                    <!-- Role Login Selectors -->
+                    <div class="pt-4 border-t border-slate-100">
+                        <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 text-center mb-2.5">Quick Role Access</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                            <button type="button" onclick="fillDemoLogin('user')" class="p-3 rounded-xl border-2 border-emerald-200 bg-emerald-50/70 hover:bg-emerald-100 text-left transition">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-extrabold uppercase text-emerald-800">User Login</span>
+                                    <i data-lucide="user" class="w-4 h-4 text-emerald-600"></i>
+                                </div>
+                                <span class="text-xs font-mono font-semibold text-slate-700 block mt-1">user@smartfleet.services</span>
+                            </button>
+                            <button type="button" onclick="fillDemoLogin('admin')" class="p-3 rounded-xl border-2 border-cyan-200 bg-cyan-50/70 hover:bg-cyan-100 text-left transition">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-extrabold uppercase text-cyan-800">Admin Login</span>
+                                    <i data-lucide="shield" class="w-4 h-4 text-cyan-600"></i>
+                                </div>
+                                <span class="text-xs font-mono font-semibold text-slate-700 block mt-1">admin@smartfleet.services</span>
+                            </button>
+                        </div>
+                        <p class="text-[11px] text-slate-400 text-center mt-3">New user accounts are provisioned exclusively by the System Administrator.</p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- 2. MAIN AUTHENTICATED APPLICATION SHELL                                   -->
+    <!-- ========================================================================= -->
+    <div id="app-shell" class="hidden flex-1 flex flex-col">
+
+        <!-- Sticky Top Header -->
+        <header class="bg-slate-900 text-white sticky top-0 z-40 shadow-lg border-b border-slate-800">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between py-3 gap-3">
+                    <!-- Brand -->
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="bg-gradient-to-br from-emerald-400 to-cyan-500 p-2 rounded-xl shadow text-slate-950">
+                                <i data-lucide="car-front" class="w-5 h-5 stroke-[2.2]"></i>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-base sm:text-lg font-extrabold tracking-tight text-white">SmartFleet <span class="text-cyan-400">VPMS</span></span>
+                                    <span id="sync-status-pill" class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                                        ● MULTI-TAB SYNC
+                                    </span>
+                                </div>
+                                <p class="text-[11px] text-slate-400 font-mono">smartfleet.services</p>
+                            </div>
+                        </div>
+
+                        <!-- Mobile Logout -->
+                        <button onclick="handleLogout()" class="md:hidden px-3 py-1.5 rounded-lg bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs font-bold">
+                            Logout
+                        </button>
+                    </div>
+
+                    <!-- Dynamic Role Navigation Tabs -->
+                    <nav id="role-nav-container" class="flex items-center bg-slate-800/90 p-1 rounded-xl border border-slate-700/80 overflow-x-auto">
+                        <!-- Populated dynamically based on User vs Admin role -->
+                    </nav>
+
+                    <!-- User Profile & Cloud Settings -->
+                    <div class="hidden md:flex items-center gap-2.5">
+                        <button onclick="openCloudModal()" title="Email API & Cloud Sync Settings" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition">
+                            <i data-lucide="settings" class="w-4 h-4 text-cyan-400"></i>
+                        </button>
+                        <div class="bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 text-right">
+                            <p id="header-user-name" class="text-xs font-bold text-white leading-none">User</p>
+                            <p id="header-user-role" class="text-[10px] font-mono text-emerald-400 mt-0.5 uppercase">VEHICLE OWNER</p>
+                        </div>
+                        <button onclick="handleLogout()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/30 text-xs font-bold transition">
+                            <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+                            <span>Logout</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Container -->
+        <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+            <!-- ================================================================= -->
+            <!-- USER VIEW B: OFFICE CAB COMMUTER & GPS TRACKER + EMAIL INBOX      -->
+            <!-- ================================================================= -->
+            <section id="view-user-cab" class="hidden space-y-6">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <!-- Assigned Cab Details, Email Inbox & Feedback (5 Cols) -->
+                    <div class="lg:col-span-5 space-y-5">
+                        <!-- Assigned Cab Card -->
+                        <div id="user-cab-assigned-card" class="bg-white rounded-2xl p-5 shadow-sm border-2 border-cyan-500 space-y-4">
+                            <div class="flex items-center justify-between">
+                                <span id="ucab-badge" class="text-xs font-extrabold uppercase tracking-wider text-cyan-700 bg-cyan-50 px-2.5 py-1 rounded-lg">
+                                    ● Office Cab Status
+                                </span>
+                                <span class="text-xs font-mono text-slate-400">Live Sync</span>
+                            </div>
+
+                            <div class="bg-slate-900 text-white rounded-xl p-4 flex items-center justify-between">
+                                <div>
+                                    <span class="text-[10px] uppercase text-slate-400 block">Pickup Bay Location</span>
+                                    <strong id="ucab-bay" class="text-xl font-extrabold font-mono text-cyan-400">Not Scheduled Yet</strong>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-[10px] uppercase text-slate-400 block">Cab ID / Shift</span>
+                                    <strong id="ucab-id" class="text-sm font-bold font-mono">—</strong>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-2.5 text-xs">
+                                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                    <span class="text-slate-400 block">Cab Number Plate</span>
+                                    <strong id="ucab-plate" class="font-mono text-slate-900">—</strong>
+                                </div>
+                                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                    <span class="text-slate-400 block">Driver & Mobile</span>
+                                    <strong id="ucab-driver" class="text-slate-900">—</strong>
+                                </div>
+                                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                    <span class="text-slate-400 block">Assigned Route</span>
+                                    <strong id="ucab-route" class="text-slate-900">—</strong>
+                                </div>
+                                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                    <span class="text-slate-400 block">Pickup Time & Status</span>
+                                    <strong id="ucab-status" class="text-emerald-600">Awaiting Assignment</strong>
+                                </div>
+                            </div>
+
+                            <div class="flex gap-2">
+                                <button onclick="toggleUserCabGpsSim()" id="btn-ucab-sim" class="flex-1 py-2.5 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition flex items-center justify-center gap-1.5">
+                                    <i data-lucide="play" class="w-3.5 h-3.5 text-cyan-400"></i>
+                                    <span>Simulate Live GPS Route</span>
+                                </button>
+                                <button onclick="showToast('SOS Alert Sent', 'Emergency location shared with Corporate Security Command.', 'danger')" class="py-2.5 px-3.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold">
+                                    SOS
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- User Received Email Notifications Inbox -->
+                        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+                            <div class="flex items-center justify-between mb-2">
+                                <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                                    <i data-lucide="mail" class="w-4 h-4 text-cyan-600"></i>
+                                    My Cab Email Notifications
+                                </h3>
+                                <span id="user-inbox-count" class="text-[11px] font-mono font-bold bg-cyan-50 text-cyan-700 px-2 py-0.5 rounded-full">0</span>
+                            </div>
+                            <p class="text-xs text-slate-500 mb-3">Automated dispatch alerts sent to <span id="user-inbox-email" class="font-mono font-semibold text-slate-700"></span></p>
+                            <div id="user-email-inbox-list" class="space-y-2.5 max-h-52 overflow-y-auto"></div>
+                        </div>
+
+                        <!-- User Feedback Submission Card -->
+                        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+                            <h3 class="font-bold text-slate-900 text-sm mb-1 flex items-center gap-2">
+                                <i data-lucide="message-square-plus" class="w-4 h-4 text-emerald-600"></i>
+                                Submit Parking / Cab Feedback
+                            </h3>
+                            <p class="text-xs text-slate-500 mb-3">Your feedback appears immediately in the Admin Analytics dashboard.</p>
+                            <form onsubmit="handleUserFeedbackSubmit(event)" class="space-y-2.5">
+                                <select id="ufb-rating" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs bg-white font-semibold">
+                                    <option value="5">★★★★★ (5/5) Seamless QR & Slot Experience</option>
+                                    <option value="4">★★★★☆ (4/5) Good Service</option>
+                                    <option value="3">★★★☆☆ (3/5) Needs Improvement</option>
+                                </select>
+                                <textarea id="ufb-comment" rows="2" required placeholder="Write your suggestion or experience..." class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
+                                <button type="submit" class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition">
+                                    Send Feedback to Admin
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Right 7 Cols: Interactive GPS Safety Radar Map -->
+                    <div class="lg:col-span-7 bg-white rounded-2xl p-5 shadow-sm border border-slate-200 flex flex-col justify-between">
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                            <div>
+                                <h3 class="font-bold text-slate-900 text-base flex items-center gap-2">
+                                    <i data-lucide="radar" class="w-5 h-5 text-cyan-600"></i> Live Office Cab GPS Telemetry
+                                </h3>
+                                <p class="text-xs text-slate-500">Real-time commuter safety tracking from Lane C Bay to Drop Point</p>
+                            </div>
+                            <span id="ucab-coords" class="font-mono text-xs font-bold bg-slate-100 px-3 py-1.5 rounded-lg text-slate-800">12.9716° N, 77.5946° E</span>
+                        </div>
+
+                        <div class="relative w-full h-80 sm:h-96 bg-slate-950 rounded-2xl overflow-hidden border border-slate-800">
+                            <svg viewBox="0 0 600 360" class="w-full h-full">
+                                <defs>
+                                    <pattern id="ugrid" width="30" height="30" patternUnits="userSpaceOnUse">
+                                        <path d="M 30 0 L 0 0 0 30" fill="none" stroke="#1e293b" stroke-width="1"/>
+                                    </pattern>
+                                </defs>
+                                <rect width="600" height="360" fill="url(#ugrid)" />
+                                <path d="M 40 300 L 180 300 L 180 180 L 420 180 L 420 80 L 550 80" fill="none" stroke="#334155" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M 40 300 L 180 300 L 180 180 L 420 180 L 420 80 L 550 80" fill="none" stroke="#06b6d4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="route-line"/>
+
+                                <rect x="25" y="255" width="120" height="75" rx="10" fill="#0f172a" stroke="#06b6d4" stroke-width="2"/>
+                                <text x="85" y="285" fill="#22d3ee" font-size="11" font-family="monospace" font-weight="bold" text-anchor="middle">LANE C HUB</text>
+                                <text x="85" y="302" fill="#94a3b8" font-size="9" text-anchor="middle">Campus Porch</text>
+
+                                <rect x="465" y="45" width="110" height="55" rx="10" fill="#0f172a" stroke="#10b981" stroke-width="2"/>
+                                <text x="520" y="70" fill="#34d399" font-size="10" font-family="monospace" font-weight="bold" text-anchor="middle">DROP SECTOR</text>
+                                <text x="520" y="85" fill="#94a3b8" font-size="9" text-anchor="middle">Employee Stop</text>
+
+                                <g id="usvg-cab-marker" transform="translate(85, 300)">
+                                    <circle cx="0" cy="0" r="18" fill="rgba(6, 182, 212, 0.25)"/>
+                                    <circle cx="0" cy="0" r="9" fill="#06b6d4" stroke="#ffffff" stroke-width="2.5"/>
+                                    <rect x="-34" y="-32" width="68" height="18" rx="4" fill="#0f172a" stroke="#22d3ee" stroke-width="1"/>
+                                    <text id="usvg-cab-label" x="0" y="-20" fill="#ffffff" font-size="9" font-family="monospace" font-weight="bold" text-anchor="middle">CAB-104</text>
+                                </g>
+                            </svg>
+
+                            <div class="absolute bottom-3 left-3 right-3 bg-slate-900/90 backdrop-blur border border-slate-700 rounded-xl px-4 py-2.5 flex items-center justify-between text-xs text-white">
+                                <div class="flex gap-4">
+                                    <div><span class="text-slate-400 text-[10px] block">SPEED</span><strong id="ucab-speed" class="font-mono text-cyan-400">0 km/h</strong></div>
+                                    <div><span class="text-slate-400 text-[10px] block">ETA</span><strong id="ucab-eta" class="font-mono text-emerald-400">At Bay</strong></div>
+                                </div>
+                                <span class="text-[11px] text-emerald-400 font-mono">GEO-FENCE ACTIVE ✓</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- ================================================================= -->
+            <!-- ADMIN VIEW 1: EXECUTIVE ANALYTICS & GATE QR SCANNER TERMINAL      -->
+            <!-- ================================================================= -->
+            <section id="view-admin-dashboard" class="hidden space-y-6">
+                <!-- Executive KPI Row -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Live Occupancy</span>
+                        <div class="flex items-baseline gap-2 mt-1">
+                            <span id="akpi-occ" class="text-2xl font-extrabold text-slate-900">0%</span>
+                            <span id="akpi-frac" class="text-xs font-mono text-slate-500">(0/22)</span>
+                        </div>
+                        <p class="text-xs text-emerald-600 font-semibold mt-1">Real-time across Lanes A, B, C</p>
+                    </div>
+                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Active Reservations</span>
+                        <div class="flex items-baseline gap-2 mt-1">
+                            <span id="akpi-res" class="text-2xl font-extrabold text-amber-600">0</span>
+                            <span class="text-xs text-slate-500">30m Window</span>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-1">Awaiting entrance QR verification</p>
+                    </div>
+                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Office Cabs Deployed</span>
+                        <div class="flex items-baseline gap-2 mt-1">
+                            <span id="akpi-cabs" class="text-2xl font-extrabold text-cyan-600">0</span>
+                            <span class="text-xs text-slate-500">Lane C Fleet</span>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-1">GPS telemetry active</p>
+                    </div>
+                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-400">CO₂ Saved Today</span>
+                        <div class="flex items-baseline gap-2 mt-1">
+                            <span id="akpi-co2" class="text-2xl font-extrabold text-emerald-600">44.2 kg</span>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-1">Avg 11.4m search time saved</p>
+                    </div>
+                </div>
+
+                <!-- Gate QR Scanner Terminal & Zone Chart -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <!-- Optical Gate QR Scanner / Validator Terminal (6 Cols) -->
+                    <div class="lg:col-span-6 bg-slate-900 text-white rounded-2xl p-6 shadow-md border border-slate-800 space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <span class="text-[10px] font-extrabold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 px-2.5 py-0.5 rounded-full border border-emerald-500/30">
+                                    GATE HARDWARE TERMINAL
+                                </span>
+                                <h3 class="text-lg font-bold mt-1 flex items-center gap-2">
+                                    <i data-lucide="scan-line" class="w-5 h-5 text-emerald-400"></i>
+                                    Verify Entry / Exit QR Payload
+                                </h3>
+                            </div>
+                            <button type="button" onclick="toggleCameraScanner()" id="btn-toggle-cam" class="px-3 py-1.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 text-xs font-bold flex items-center gap-1.5">
+                                <i data-lucide="camera" class="w-3.5 h-3.5"></i>
+                                <span>Camera Scan</span>
+                            </button>
+                        </div>
+                        <p class="text-xs text-slate-300">
+                            Scan a user's QR pass via camera, paste the scanned JSON payload below, or auto-load an active pass to open the boom barrier.
+                        </p>
+
+                        <!-- Optional Live Camera QR Reader Box -->
+                        <div id="admin-camera-box" class="hidden rounded-xl overflow-hidden border border-slate-700 bg-black relative">
+                            <video id="admin-qr-video" class="w-full h-44 object-cover" playsinline></video>
+                            <div class="absolute bottom-2 left-2 right-2 bg-slate-950/80 text-[11px] text-cyan-300 px-3 py-1 rounded-lg flex justify-between items-center">
+                                <span>Point camera at Entry/Exit QR Pass</span>
+                                <button type="button" onclick="stopCameraScanner()" class="text-rose-400 font-bold">Stop</button>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3">
+                            <textarea id="admin-qr-input" rows="3" placeholder='{"bookingId":"VPMS-...","phase":"ENTRY","slot":"A-01",...}' class="w-full rounded-xl bg-slate-950 border border-slate-700 p-3 text-xs font-mono text-emerald-300 focus:outline-none focus:border-emerald-500"></textarea>
+                            <div class="flex flex-wrap gap-2">
+                                <button onclick="verifyAdminQRPayload()" class="flex-1 py-2.5 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs transition flex items-center justify-center gap-1.5">
+                                    <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+                                    <span>Validate & Process Gate Scan</span>
+                                </button>
+                                <button onclick="loadLatestActivePassIntoScanner()" class="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700">
+                                    Auto-Load Latest Pass
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Live Utilization Chart (6 Cols) -->
+                    <div class="lg:col-span-6 bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+                        <h3 class="font-bold text-slate-900 text-sm mb-1">Zone Occupancy Breakdown</h3>
+                        <p class="text-xs text-slate-500 mb-3">Live capacity distribution across Lanes A, B, and C</p>
+                        <div class="h-56 relative">
+                            <canvas id="adminZoneChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Audit Logs & User Feedback -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <!-- Audit Logs (7 Cols) -->
+                    <div class="lg:col-span-7 bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="font-bold text-slate-900 text-base">Backend QR & System Audit Logs</h3>
+                            <div class="flex gap-2">
+                                <button onclick="exportSystemJSON()" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold">Export JSON</button>
+                                <button onclick="resetDemoDatabase()" class="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold">Reset Demo Data</button>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto max-h-64">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="border-b border-slate-200 text-[11px] uppercase text-slate-400">
+                                        <th class="py-2 px-2">Time</th>
+                                        <th class="py-2 px-2">Action</th>
+                                        <th class="py-2 px-2">Details</th>
+                                        <th class="py-2 px-2">Slot</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-logs-tbody" class="divide-y divide-slate-100"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- User Feedback Review (5 Cols) -->
+                    <div class="lg:col-span-5 bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+                        <h3 class="font-bold text-slate-900 text-base mb-3">Commuter & Driver Feedback</h3>
+                        <div id="admin-feedback-list" class="space-y-2.5 max-h-64 overflow-y-auto"></div>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- ================================================================= -->
+            <!-- ADMIN VIEW 2: SLOT & LANE MANAGEMENT CONSOLE                      -->
+            <!-- ================================================================= -->
+            <section id="view-admin-slots" class="hidden space-y-6">
+                <!-- Add New Slot & Global Reset Bar -->
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 flex flex-col xl:flex-row xl:items-end justify-between gap-4">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-900">Parking Slot & Lane Control Console</h2>
+                        <p class="text-xs text-slate-500">Create new slots, edit status/vehicle assignments, force-release slots, or reset all slots to Available.</p>
+                    </div>
+                    <div class="flex flex-wrap items-end gap-2.5">
+                        <button type="button" onclick="adminResetAllSlotsToAvailable()" class="py-2 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+                            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                            <span>Reset All Slots to Available</span>
+                        </button>
+                        <form onsubmit="handleAdminAddSlot(event)" class="flex flex-wrap items-end gap-2">
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Lane</label>
+                                <select id="admin-new-lane" class="rounded-xl border border-slate-300 px-3 py-2 text-xs font-bold bg-white">
+                                    <option value="A">Lane A (Car)</option>
+                                    <option value="B">Lane B (Bike)</option>
+                                    <option value="C">Lane C (Office Cab)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Slot ID</label>
+                                <input type="text" id="admin-new-slot-id" required placeholder="e.g., A-09" class="w-24 rounded-xl border border-slate-300 px-3 py-2 text-xs font-mono uppercase font-bold">
+                            </div>
+                            <button type="submit" class="py-2 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition flex items-center gap-1.5">
+                                <i data-lucide="plus" class="w-4 h-4 text-emerald-400"></i>
+                                <span>Add Slot</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Editable Slots Table -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead class="bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase text-slate-500">
+                                <tr>
+                                    <th class="py-3 px-4">Slot ID</th>
+                                    <th class="py-3 px-4">Lane & Type</th>
+                                    <th class="py-3 px-4">Status</th>
+                                    <th class="py-3 px-4">Vehicle Plate & Driver</th>
+                                    <th class="py-3 px-4 text-right">Admin Edit & Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-slots-tbody" class="divide-y divide-slate-100"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- ================================================================= -->
+            <!-- ADMIN VIEW 3: USERS & ACCOUNTS MANAGEMENT (FULL PRIVILEGES)       -->
+            <!-- ================================================================= -->
+            <section id="view-admin-users" class="hidden space-y-6">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                    <!-- Create / Edit User Account Form (5 Cols) -->
+                    <div class="lg:col-span-5 bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+                        <div class="flex items-center justify-between mb-1">
+                            <h3 id="auser-form-title" class="text-base font-bold text-slate-900">Create New User Account</h3>
+                            <button type="button" id="auser-cancel-edit" onclick="resetAdminUserForm()" class="hidden text-xs font-bold text-rose-600 underline">Cancel Edit</button>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-4">Only administrators can provision or modify user credentials, mobile numbers, and email IDs.</p>
+
+                        <form onsubmit="handleAdminSaveUser(event)" class="space-y-3.5">
+                            <input type="hidden" id="auser-edit-original-email" value="">
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-[11px] font-bold uppercase text-slate-600 mb-1">Full Name</label>
+                                    <input type="text" id="auser-name" required placeholder="e.g., Kiran Kumar" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold uppercase text-slate-600 mb-1">Account Role</label>
+                                    <select id="auser-role" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-bold bg-white">
+                                        <option value="user">User (Employee / Commuter)</option>
+                                        <option value="admin">Administrator (Full Access)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-[11px] font-bold uppercase text-slate-600 mb-1">Email ID (For Login & Alerts)</label>
+                                    <input type="email" id="auser-email" required placeholder="kiran@smartfleet.services" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-mono">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold uppercase text-slate-600 mb-1">Mobile Number</label>
+                                    <input type="tel" id="auser-mobile" required placeholder="+91 98765 43210" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-mono">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <div>
+                                    <label class="block text-[11px] font-bold uppercase text-slate-600 mb-1">Password</label>
+                                    <input type="text" id="auser-password" required placeholder="user123" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-mono">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold uppercase text-slate-600 mb-1">Vehicle Type</label>
+                                    <select id="auser-vtype" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs bg-white">
+                                        <option value="car">Car (Lane A)</option>
+                                        <option value="bike">Bike (Lane B)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold uppercase text-slate-600 mb-1">Vehicle Plate</label>
+                                    <input type="text" id="auser-plate" required placeholder="KA-01-AB-1234" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-mono uppercase">
+                                </div>
+                            </div>
+
+                            <button type="submit" id="auser-submit-btn" class="w-full py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow transition flex items-center justify-center gap-2">
+                                <i data-lucide="user-plus" class="w-4 h-4 text-emerald-400"></i>
+                                <span>Create User Account</span>
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Registered Users Directory Table (7 Cols) -->
+                    <div class="lg:col-span-7 bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+                        <div class="flex items-center justify-between mb-3">
+                            <div>
+                                <h3 class="text-base font-bold text-slate-900">Registered Users & Administrators</h3>
+                                <p class="text-xs text-slate-500">Click Edit to update mobile number, email ID, password, or vehicle details</p>
+                            </div>
+                            <span id="auser-total-badge" class="text-xs font-mono font-bold bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg">0 Accounts</span>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead class="bg-slate-50 border-b border-slate-200 text-[10px] font-bold uppercase text-slate-500">
+                                    <tr>
+                                        <th class="py-2.5 px-3">Name & Role</th>
+                                        <th class="py-2.5 px-3">Email ID & Mobile</th>
+                                        <th class="py-2.5 px-3">Vehicle</th>
+                                        <th class="py-2.5 px-3 text-right">Privileges / Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-users-tbody" class="divide-y divide-slate-100"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- ================================================================= -->
+            <!-- ADMIN VIEW 4: OFFICE CAB SCHEDULING & EMAIL NOTIFICATIONS         -->
+            <!-- ================================================================= -->
+            <section id="view-admin-cabs" class="hidden space-y-6">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                    <!-- Schedule & Assign Office Cab Form (5 Cols) -->
+                    <div class="lg:col-span-5 bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+                        <h3 class="text-base font-bold text-slate-900 mb-1">Schedule & Assign Corporate Cab</h3>
+                        <p class="text-xs text-slate-500 mb-4">Assign a Lane C bay slot and automatically dispatch an email & SMS alert to the commuter.</p>
+
+                        <form onsubmit="handleAdminSaveCab(event)" class="space-y-3.5">
+                            <!-- Select Registered User Auto-Fill -->
+                            <div class="bg-cyan-50/70 border border-cyan-200 rounded-xl p-3">
+                                <label class="block text-[10px] font-extrabold uppercase text-cyan-800 mb-1">Select Registered Commuter (Auto-Fills Email & Mobile)</label>
+                                <select id="acab-user-picker" onchange="onSelectCommuterForCab(this.value)" class="w-full rounded-lg border border-cyan-300 px-2.5 py-2 text-xs font-semibold bg-white text-slate-900">
+                                    <option value="">-- Select User or Enter Manually Below --</option>
+                                </select>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-[11px] font-bold uppercase text-slate-600 mb-1">Commuter Name</label>
+                                    <input type="text" id="acab-commuter-name" required placeholder="User" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold uppercase text-slate-600 mb-1">Commuter Mobile</label>
+                                    <input type="tel" id="acab-commuter-mobile" required placeholder="+91 98765 43210" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-mono">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-[11px] font-bold uppercase text-slate-600 mb-1">Commuter Email ID (Receives Notification)</label>
+                                <input type="email" id="acab-commuter" required placeholder="user@smartfleet.services" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-mono">
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-[11px] font-bold uppercase text-slate-600 mb-1">Cab ID</label>
+                                    <input type="text" id="acab-id" required placeholder="CAB-101" value="CAB-101" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-mono uppercase font-bold">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold uppercase text-slate-600 mb-1">Lane C Bay Slot</label>
+                                    <select id="acab-slot" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-mono font-bold bg-white"></select>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-[11px] font-bold uppercase text-slate-600 mb-1">Cab Number Plate</label>
+                                    <input type="text" id="acab-plate" required placeholder="KA-05-AB-7741" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-mono uppercase">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold uppercase text-slate-600 mb-1">Scheduled Pickup Time</label>
+                                    <input type="text" id="acab-time" required placeholder="06:30 PM" value="06:30 PM" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-mono">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-[11px] font-bold uppercase text-slate-600 mb-1">Driver Name & Phone</label>
+                                    <input type="text" id="acab-driver" required placeholder="Ramesh (98450-11223)" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold uppercase text-slate-600 mb-1">Route Corridor</label>
+                                    <input type="text" id="acab-route" required placeholder="Electronic City → Campus" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-[11px] font-bold uppercase text-slate-600 mb-1">Cab Status</label>
+                                <select id="acab-status" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs bg-white font-semibold">
+                                    <option value="Scheduled & Parked at Bay">Scheduled & Parked at Bay</option>
+                                    <option value="En Route (GPS Active)">En Route (GPS Active)</option>
+                                    <option value="Dispatched">Dispatched</option>
+                                </select>
+                            </div>
+
+                            <button type="submit" class="w-full py-3 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white font-bold text-xs shadow transition flex items-center justify-center gap-2">
+                                <i data-lucide="mail-check" class="w-4 h-4"></i>
+                                <span>Schedule & Assign Cab + Send Email</span>
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Active Cab Roster & Sent Email Notifications Log (7 Cols) -->
+                    <div class="lg:col-span-7 space-y-5">
+                        <!-- Active Cabs Table -->
+                        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+                            <div class="flex items-center justify-between mb-3">
+                                <div>
+                                    <h3 class="text-base font-bold text-slate-900">Scheduled & Assigned Office Cabs</h3>
+                                    <p class="text-xs text-slate-500">Live Lane C bay allocations</p>
+                                </div>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left border-collapse text-xs">
+                                    <thead class="bg-slate-50 border-b border-slate-200 text-[10px] uppercase text-slate-500">
+                                        <tr>
+                                            <th class="py-2.5 px-3">Cab & Bay</th>
+                                            <th class="py-2.5 px-3">Driver & Plate</th>
+                                            <th class="py-2.5 px-3">Commuter (Email / Mobile)</th>
+                                            <th class="py-2.5 px-3">Time & Status</th>
+                                            <th class="py-2.5 px-3 text-right">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="admin-cabs-tbody" class="divide-y divide-slate-100"></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Sent Email Notifications Log -->
+                        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+                            <div class="flex items-center justify-between mb-3">
+                                <div>
+                                    <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                                        <i data-lucide="mails" class="w-4 h-4 text-cyan-600"></i>
+                                        Dispatched Email Notifications Log
+                                    </h3>
+                                    <p class="text-xs text-slate-500">Automated cab schedule & bay alerts sent to commuters</p>
+                                </div>
+                                <span id="admin-email-count" class="text-xs font-mono font-bold bg-cyan-50 text-cyan-800 px-2.5 py-0.5 rounded-full">0 Sent</span>
+                            </div>
+                            <div id="admin-sent-emails-list" class="space-y-2.5 max-h-64 overflow-y-auto"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-white border-t border-slate-200 mt-10">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500">
+                <span><strong class="text-slate-800">smartfleet.services</strong> • Vehicle Parking Management System (VPMS)</span>
+                <span>JAIN (Deemed-to-be-University) BCA Project • Royston J. Furtado, Bhanuprakash, Dhanraj</span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- 3. EMAIL NOTIFICATION DISPATCH PREVIEW MODAL (WHEN CAB IS ASSIGNED)       -->
+    <!-- ========================================================================= -->
+    <div id="email-dispatch-modal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                        <i data-lucide="mail-check" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <span class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-700">Notification Dispatched</span>
+                        <h3 class="text-base font-extrabold text-slate-900">Cab Assignment Email Sent</h3>
+                    </div>
+                </div>
+                <button onclick="closeEmailDispatchModal()" class="text-slate-400 hover:text-slate-700"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+
+            <div class="bg-slate-50 rounded-xl p-4 border border-slate-200 space-y-2 text-xs">
+                <div class="flex justify-between">
+                    <span class="text-slate-500">To Email ID:</span>
+                    <strong id="modal-email-to" class="font-mono text-slate-900">user@smartfleet.services</strong>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-500">SMS Alert Mobile:</span>
+                    <strong id="modal-email-mobile" class="font-mono text-slate-900">+91 98765 43210</strong>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-500">Subject:</span>
+                    <strong id="modal-email-subject" class="text-slate-900">Office Cab Assigned</strong>
+                </div>
+                <hr class="border-slate-200 my-2">
+                <pre id="modal-email-body" class="whitespace-pre-wrap font-sans text-xs text-slate-700 leading-relaxed bg-white p-3 rounded-lg border border-slate-200"></pre>
+            </div>
+
+            <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+                <a id="modal-mailto-link" href="#" target="_blank" class="px-4 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm">
+                    <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                    <span>Open in Mail App (mailto:)</span>
+                </a>
+                <button onclick="closeEmailDispatchModal()" class="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold">
+                    Done
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- 4. CLOUD SYNC & EMAILJS API SETTINGS MODAL                                -->
+    <!-- ========================================================================= -->
+    <div id="cloud-modal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+            <div class="flex items-center justify-between">
+                <h3 class="text-base font-extrabold text-slate-900 flex items-center gap-2">
+                    <i data-lucide="settings" class="w-5 h-5 text-cyan-600"></i>
+                    Email Webhook & Cloud Sync Settings
+                </h3>
+                <button onclick="closeCloudModal()" class="text-slate-400 hover:text-slate-700"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-[11px] font-bold uppercase text-slate-500 mb-1">Firebase Realtime Database URL (Optional Cross-Device Sync)</label>
+                    <input type="url" id="firebase-url-input" placeholder="https://your-project-default-rtdb.firebaseio.com" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-xs font-mono">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold uppercase text-slate-500 mb-1">Email Webhook / Formspree / Make.com URL (Optional Auto-Email)</label>
+                    <input type="url" id="email-webhook-input" placeholder="https://hook.eu1.make.com/..." class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-xs font-mono">
+                    <p class="text-[11px] text-slate-400 mt-1">If set, cab assignment emails are POSTed automatically in the background in addition to in-app inbox & mailto.</p>
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 pt-2">
+                <button onclick="clearFirebaseUrl()" class="px-3 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold">Reset Settings</button>
+                <button onclick="saveFirebaseUrl()" class="px-4 py-2 rounded-xl bg-cyan-600 text-white text-xs font-bold">Save Configuration</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // =========================================================================
+        // 1. PERSISTENT STORAGE & DEFAULT DATABASE (ALL SLOTS AVAILABLE)
+        // =========================================================================
+        const STORAGE_KEY = 'smartfleet_vpms_db_v2';
+        const SESSION_KEY = 'smartfleet_vpms_session_v2';
+        const FIREBASE_KEY = 'smartfleet_vpms_firebase_url';
+        const EMAIL_WEBHOOK_KEY = 'smartfleet_vpms_email_webhook';
+
+        function getDefaultDatabase() {
+            return {
+                users: [
+                    { name: 'Administrator', email: 'admin@smartfleet.services', mobile: '+91 90000 00001', password: 'admin123', role: 'admin', vehicleType: 'car', plate: 'ADMIN-HQ' },
+                    { name: 'User', email: 'user@smartfleet.services', mobile: '+91 98765 43210', password: 'user123', role: 'user', vehicleType: 'car', plate: 'KA-01-AB-1234' }
+                ],
+                slots: [
+                    // Lane A: Cars (A-01 to A-08) — ALL AVAILABLE BY DEFAULT
+                    { id: 'A-01', lane: 'A', type: 'car', status: 'available', vehicleNo: null, driverEmail: null, driverName: null },
+                    { id: 'A-02', lane: 'A', type: 'car', status: 'available', vehicleNo: null, driverEmail: null, driverName: null },
+                    { id: 'A-03', lane: 'A', type: 'car', status: 'available', vehicleNo: null, driverEmail: null, driverName: null },
+                    { id: 'A-04', lane: 'A', type: 'car', status: 'available', vehicleNo: null, driverEmail: null, driverName: null },
+                    { id: 'A-05', lane: 'A', type: 'car', status: 'available', vehicleNo: null, driverEmail: null, driverName: null },
+                    { id: 'A-06', lane: 'A', type: 'car', status: 'available', vehicleNo: null, driverEmail: null, driverName: null },
+                    { id: 'A-07', lane: 'A', type: 'car', status: 'available', vehicleNo: null, driverEmail: null, driverName: null },
+                    { id: 'A-08', lane: 'A', type: 'car', status: 'available', vehicleNo: null, driverEmail: null, driverName: null },
+
+                    // Lane B: Bikes (B-01 to B-08) — ALL AVAILABLE BY DEFAULT
+                    { id: 'B-01', lane: 'B', type: 'bike', status: 'available', vehicleNo: null, driverEmail: null, driverName: null },
+                    { id: 'B-02', lane: 'B', type: 'bike', status: 'available', vehicleNo: null, driverEmail: null, driverName: null },
+                    { id: 'B-03', lane: 'B', type: 'bike', status: 'available', vehicleNo: null, driverEmail: null, driverName: null },
+                    { id: 'B-04', lane: 'B', type: 'bike', status: 'available', vehicleNo: null, driverEmail: null, driverName: null },
+                    { id: 'B-05', lane: 'B', type: 'bike', status: 'available', vehicleNo: null, driverEmail: null, driverName: null },
+                    { id: 'B-06', lane: 'B', type: 'bike', status: 'available', vehicleNo: null, driverEmail: null, driverName: null },
+                    { id: 'B-07', lane: 'B', type: 'bike', status: 'available', vehicleNo: null, driverEmail: null, driverName: null },
+                    { id: 'B-08', lane: 'B', type: 'bike', status: 'available', vehicleNo: null, driverEmail: null, driverName: null },
+
+                    // Lane C: Dedicated Corporate Office Cabs (C-01 to C-06) — ALL AVAILABLE BY DEFAULT
+                    { id: 'C-01', lane: 'C', type: 'cab', status: 'available', vehicleNo: null, driverEmail: null, driverName: null },
+                    { id: 'C-02', lane: 'C', type: 'cab', status: 'available', vehicleNo: null, driverEmail: null, driverName: null },
+                    { id: 'C-03', lane: 'C', type: 'cab', status: 'available', vehicleNo: null, driverEmail: null, driverName: null },
+                    { id: 'C-04', lane: 'C', type: 'cab', status: 'available', vehicleNo: null, driverEmail: null, driverName: null },
+                    { id: 'C-05', lane: 'C', type: 'cab', status: 'available', vehicleNo: null, driverEmail: null, driverName: null },
+                    { id: 'C-06', lane: 'C', type: 'cab', status: 'available', vehicleNo: null, driverEmail: null, driverName: null }
+                ],
+                cabs: [],
+                bookings: {},
+                sentEmails: [],
+                logs: [
+                    { time: new Date().toTimeString().slice(0, 8), action: 'SYSTEM_READY', details: 'All 22 parking slots initialized to AVAILABLE', slot: 'ALL' }
+                ],
+                feedbacks: []
+            };
+        }
+
+        let db = loadDatabase();
+        let currentUser = loadSession();
+        let userGraceTimer = null;
+        let userBookingType = 'car';
+        let adminChart = null;
+        let currentQRPayloadString = '';
+        let cameraStream = null;
+
+        // Cab GPS Simulation state
+        let uCabSimRunning = false;
+        let uCabSimInterval = null;
+        let uCabStep = 0;
+
+        function loadDatabase() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (!parsed.sentEmails) parsed.sentEmails = [];
+                    return parsed;
+                }
+            } catch (e) { console.error(e); }
+            const def = getDefaultDatabase();
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(def));
+            return def;
+        }
+
+        function saveDatabase() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+            pushToFirebaseIfConfigured();
+        }
+
+        function loadSession() {
+            try {
+                const raw = sessionStorage.getItem(SESSION_KEY) || localStorage.getItem(SESSION_KEY);
+                return raw ? JSON.parse(raw) : null;
+            } catch (e) { return null; }
+        }
+
+        // Listen for cross-tab localStorage changes so Admin & User tabs sync live
+        window.addEventListener('storage', (e) => {
+            if (e.key === STORAGE_KEY && e.newValue) {
+                db = JSON.parse(e.newValue);
+                if (currentUser) refreshCurrentUI();
+            }
+        });
+
+        // Optional Firebase Realtime DB sync
+        async function pushToFirebaseIfConfigured() {
+            const fbUrl = localStorage.getItem(FIREBASE_KEY);
+            if (!fbUrl) return;
+            try {
+                const cleanUrl = fbUrl.replace(/\/$/, '') + '/vpms_state.json';
+                await fetch(cleanUrl, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(db)
+                });
+            } catch (err) {
+                console.warn('Cloud sync warning:', err);
+            }
+        }
+
+        async function pullFromFirebaseIfConfigured() {
+            const fbUrl = localStorage.getItem(FIREBASE_KEY);
+            if (!fbUrl) return;
+            try {
+                const cleanUrl = fbUrl.replace(/\/$/, '') + '/vpms_state.json';
+                const res = await fetch(cleanUrl);
+                const cloudData = await res.json();
+                if (cloudData && cloudData.slots) {
+                    db = cloudData;
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+                    if (currentUser) refreshCurrentUI();
+                }
+            } catch (err) {
+                console.warn('Cloud fetch warning:', err);
+            }
+        }
+
+        // =========================================================================
+        // 2. INITIALIZATION & AUTHENTICATION (USER LOGIN & ADMIN LOGIN ONLY)
+        // =========================================================================
+        window.onload = function () {
+            lucide.createIcons();
+            updateCloudBadge();
+            if (currentUser) {
+                enterAppShell();
+            }
+            setInterval(pullFromFirebaseIfConfigured, 5000);
+        };
+
+        function fillDemoLogin(role) {
+            if (role === 'admin') {
+                document.getElementById('login-email').value = 'admin@smartfleet.services';
+                document.getElementById('login-password').value = 'admin123';
+                showToast('Admin Login Selected', 'Click "Login to SmartFleet VPMS" to access Admin Controls.', 'info');
+            } else {
+                document.getElementById('login-email').value = 'user@smartfleet.services';
+                document.getElementById('login-password').value = 'user123';
+                showToast('User Login Selected', 'Click "Login to SmartFleet VPMS" to book slots.', 'info');
+            }
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value.trim().toLowerCase();
+            const password = document.getElementById('login-password').value;
+
+            db = loadDatabase();
+            const found = db.users.find(u => u.email.toLowerCase() === email && u.password === password);
+            if (!found) {
+                showToast('Invalid Credentials', 'Check your Email ID and Password or contact the Administrator.', 'danger');
+                return;
+            }
+
+            currentUser = found;
+            sessionStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
+            enterAppShell();
+            showToast(`Welcome, ${currentUser.name}`, `Signed in as ${currentUser.role.toUpperCase()}.`, 'success');
+        }
+
+        function handleLogout() {
+            clearInterval(userGraceTimer);
+            clearInterval(uCabSimInterval);
+            stopCameraScanner();
+            currentUser = null;
+            sessionStorage.removeItem(SESSION_KEY);
+            document.getElementById('app-shell').classList.add('hidden');
+            document.getElementById('auth-screen').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function enterAppShell() {
+            document.getElementById('auth-screen').classList.add('hidden');
+            document.getElementById('app-shell').classList.remove('hidden');
+
+            document.getElementById('header-user-name').textContent = currentUser.name;
+            document.getElementById('header-user-role').textContent = currentUser.role === 'admin' ? 'ADMINISTRATOR' : `USER • ${currentUser.plate}`;
+
+            buildRoleNavigation();
+            refreshCurrentUI();
+        }
+
+        function buildRoleNavigation() {
+            const nav = document.getElementById('role-nav-container');
+            nav.innerHTML = '';
+
+            if (currentUser.role === 'admin') {
+                nav.innerHTML = `
+                    <button id="atab-dashboard" onclick="switchAdminSubTab('dashboard')" class="px-3.5 py-2 rounded-lg text-xs font-bold bg-emerald-500 text-slate-950 shadow transition whitespace-nowrap">Analytics & QR Gate</button>
+                    <button id="atab-slots" onclick="switchAdminSubTab('slots')" class="px-3.5 py-2 rounded-lg text-xs font-bold text-slate-300 hover:text-white transition whitespace-nowrap">Manage Slots</button>
+                    <button id="atab-users" onclick="switchAdminSubTab('users')" class="px-3.5 py-2 rounded-lg text-xs font-bold text-slate-300 hover:text-white transition whitespace-nowrap">Users & Accounts</button>
+                    <button id="atab-cabs" onclick="switchAdminSubTab('cabs')" class="px-3.5 py-2 rounded-lg text-xs font-bold text-slate-300 hover:text-white transition whitespace-nowrap">Cab Scheduling & Mail</button>
+                `;
+                switchAdminSubTab('dashboard');
+            } else {
+                nav.innerHTML = `
+                    <button id="utab-parking" onclick="switchUserSubTab('parking')" class="px-3.5 py-2 rounded-lg text-xs font-bold bg-emerald-500 text-slate-950 shadow transition whitespace-nowrap">Book Slot & QR Pass</button>
+                    <button id="utab-cab" onclick="switchUserSubTab('cab')" class="px-3.5 py-2 rounded-lg text-xs font-bold text-slate-300 hover:text-white transition whitespace-nowrap">My Office Cab & Inbox</button>
+                `;
+                switchUserSubTab('parking');
+            }
+        }
+
+        function switchUserSubTab(tab) {
+            ['view-user-parking', 'view-user-cab', 'view-admin-dashboard', 'view-admin-slots', 'view-admin-users', 'view-admin-cabs'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(`view-user-${tab}`).classList.remove('hidden');
+
+            ['parking', 'cab'].forEach(t => {
+                const btn = document.getElementById(`utab-${t}`);
+                if (!btn) return;
+                btn.className = t === tab
+                    ? 'px-3.5 py-2 rounded-lg text-xs font-bold bg-emerald-500 text-slate-950 shadow transition whitespace-nowrap'
+                    : 'px-3.5 py-2 rounded-lg text-xs font-bold text-slate-300 hover:text-white transition whitespace-nowrap';
+            });
+            refreshCurrentUI();
+        }
+
+        function switchAdminSubTab(tab) {
+            ['view-user-parking', 'view-user-cab', 'view-admin-dashboard', 'view-admin-slots', 'view-admin-users', 'view-admin-cabs'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(`view-admin-${tab}`).classList.remove('hidden');
+
+            ['dashboard', 'slots', 'users', 'cabs'].forEach(t => {
+                const btn = document.getElementById(`atab-${t}`);
+                if (!btn) return;
+                btn.className = t === tab
+                    ? 'px-3.5 py-2 rounded-lg text-xs font-bold bg-emerald-500 text-slate-950 shadow transition whitespace-nowrap'
+                    : 'px-3.5 py-2 rounded-lg text-xs font-bold text-slate-300 hover:text-white transition whitespace-nowrap';
+            });
+            refreshCurrentUI();
+        }
+
+        function refreshCurrentUI() {
+            if (!currentUser) return;
+            // Keep currentUser synced with latest edits from Admin
+            const freshUser = db.users.find(u => u.email.toLowerCase() === currentUser.email.toLowerCase());
+            if (freshUser) {
+                currentUser = freshUser;
+                document.getElementById('header-user-name').textContent = currentUser.name;
+                document.getElementById('header-user-role').textContent = currentUser.role === 'admin' ? 'ADMINISTRATOR' : `USER • ${currentUser.plate}`;
+            }
+
+            if (currentUser.role === 'admin') {
+                renderAdminDashboard();
+                renderAdminSlotsTable();
+                renderAdminUsersTable();
+                renderAdminCabsAndEmails();
+            } else {
+                renderUserParkingView();
+                renderUserCabView();
+            }
+            lucide.createIcons();
+        }
+
+        // =========================================================================
+        // 3. USER PARKING WORKFLOW & REAL SCANNABLE QR GENERATION
+        // =========================================================================
+        function renderUserParkingView() {
+            const gridA = document.getElementById('user-grid-a');
+            const gridB = document.getElementById('user-grid-b');
+            const gridC = document.getElementById('user-grid-c');
+            gridA.innerHTML = '';
+            gridB.innerHTML = '';
+            gridC.innerHTML = '';
+
+            let avail = 0, res = 0, occ = 0, cabCount = 0, aFree = 0, bFree = 0;
+            const myBooking = db.bookings[currentUser.email];
+
+            db.slots.forEach(slot => {
+                if (slot.status === 'available') {
+                    avail++;
+                    if (slot.lane === 'A') aFree++;
+                    if (slot.lane === 'B') bFree++;
+                } else if (slot.status === 'reserved') res++;
+                else if (slot.status === 'occupied') occ++;
+                else if (slot.status === 'cab') cabCount++;
+
+                const isMine = myBooking && myBooking.slot === slot.id;
+                const card = document.createElement('div');
+                let cls = '';
+                let label = '';
+
+                if (slot.status === 'available') {
+                    cls = 'bg-emerald-50/80 hover:bg-emerald-100 border-emerald-300 text-emerald-950 cursor-pointer';
+                    label = 'AVAILABLE';
+                } else if (slot.status === 'reserved') {
+                    cls = 'bg-amber-50 border-amber-400 text-amber-950 ring-2 ring-amber-400/50';
+                    label = isMine ? 'YOUR HOLD' : 'RESERVED';
+                } else if (slot.status === 'occupied') {
+                    cls = isMine ? 'bg-rose-100 border-rose-500 text-rose-950 ring-2 ring-rose-500/40' : 'bg-slate-100 border-slate-300 text-slate-600';
+                    label = isMine ? 'YOUR VEHICLE' : 'OCCUPIED';
+                } else if (slot.status === 'maintenance') {
+                    cls = 'bg-slate-200 border-slate-400 text-slate-500 opacity-75';
+                    label = 'MAINTENANCE';
+                } else if (slot.status === 'cab') {
+                    cls = 'bg-cyan-100/80 border-cyan-400 text-cyan-950';
+                    label = 'OFFICE CAB';
+                }
+
+                card.className = `rounded-xl border p-3 transition flex flex-col justify-between min-h-[84px] ${cls}`;
+                card.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <span class="font-mono font-extrabold text-xs">${slot.id}</span>
+                        <span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-white/80">${label}</span>
+                    </div>
+                    <div class="text-[10px] font-mono truncate mt-2 opacity-85">
+                        ${slot.vehicleNo || (slot.lane === 'C' ? 'Cab Bay' : 'Tap to Select')}
+                    </div>
+                `;
+
+                card.onclick = () => {
+                    if (slot.lane === 'C') {
+                        switchUserSubTab('cab');
+                        return;
+                    }
+                    if (slot.status === 'available' && !myBooking) {
+                        setUserBookingType(slot.type);
+                        document.getElementById('user-slot-select').value = slot.id;
+                        showToast('Slot Selected', `Slot ${slot.id} selected in booking console.`, 'info');
+                    }
+                };
+
+                if (slot.lane === 'A') gridA.appendChild(card);
+                else if (slot.lane === 'B') gridB.appendChild(card);
+                else gridC.appendChild(card);
+            });
+
+            document.getElementById('u-count-avail').textContent = avail;
+            document.getElementById('u-count-res').textContent = res;
+            document.getElementById('u-count-occ').textContent = occ;
+            document.getElementById('u-count-cab').textContent = cabCount;
+            document.getElementById('u-lane-a-free').textContent = `${aFree} Free`;
+            document.getElementById('u-lane-b-free').textContent = `${bFree} Free`;
+
+            // Toggle Booking Form vs Active Pass Card
+            const bookCard = document.getElementById('user-booking-card');
+            const passCard = document.getElementById('user-active-pass-card');
+
+            if (!myBooking) {
+                clearInterval(userGraceTimer);
+                bookCard.classList.remove('hidden');
+                passCard.classList.add('hidden');
+                document.getElementById('user-book-plate').value = currentUser.plate || 'KA-01-AB-1234';
+                setUserBookingType(userBookingType || currentUser.vehicleType || 'car');
+            } else {
+                bookCard.classList.add('hidden');
+                passCard.classList.remove('hidden');
+                renderUserActivePass(myBooking);
+            }
+        }
+
+        function setUserBookingType(type) {
+            userBookingType = type;
+            const carBtn = document.getElementById('ubtn-car');
+            const bikeBtn = document.getElementById('ubtn-bike');
+            if (type === 'car') {
+                carBtn.className = 'py-2.5 px-3 rounded-xl border-2 border-emerald-500 bg-emerald-50 text-emerald-800 font-bold text-xs flex items-center justify-center gap-1.5';
+                bikeBtn.className = 'py-2.5 px-3 rounded-xl border border-slate-200 bg-white text-slate-600 font-bold text-xs flex items-center justify-center gap-1.5';
+            } else {
+                bikeBtn.className = 'py-2.5 px-3 rounded-xl border-2 border-emerald-500 bg-emerald-50 text-emerald-800 font-bold text-xs flex items-center justify-center gap-1.5';
+                carBtn.className = 'py-2.5 px-3 rounded-xl border border-slate-200 bg-white text-slate-600 font-bold text-xs flex items-center justify-center gap-1.5';
+            }
+
+            const select = document.getElementById('user-slot-select');
+            const freeSlots = db.slots.filter(s => s.type === type && s.status === 'available');
+            select.innerHTML = '';
+            if (freeSlots.length === 0) {
+                select.innerHTML = `<option value="">No ${type} slots available</option>`;
+            } else {
+                freeSlots.forEach(s => {
+                    const opt = document.createElement('option');
+                    opt.value = s.id;
+                    opt.textContent = `Lane ${s.lane} • Slot ${s.id} (Available)`;
+                    select.appendChild(opt);
+                });
+            }
+        }
+
+        function handleUserBookSlot(e) {
+            e.preventDefault();
+            const slotId = document.getElementById('user-slot-select').value;
+            const plate = document.getElementById('user-book-plate').value.trim().toUpperCase();
+
+            if (!slotId) {
+                showToast('No Slot Available', 'Please select an available slot.', 'danger');
+                return;
+            }
+
+            const slot = db.slots.find(s => s.id === slotId);
+            if (!slot || slot.status !== 'available') {
+                showToast('Slot Taken', 'That slot was just booked. Please pick another.', 'warning');
+                refreshCurrentUI();
+                return;
+            }
+
+            slot.status = 'reserved';
+            slot.vehicleNo = plate;
+            slot.driverEmail = currentUser.email;
+            slot.driverName = currentUser.name;
+
+            const booking = {
+                bookingId: 'VPMS-' + Math.floor(1000 + Math.random() * 9000),
+                userEmail: currentUser.email,
+                userName: currentUser.name,
+                vehiclePlate: plate,
+                vehicleType: slot.type,
+                lane: slot.lane,
+                slot: slot.id,
+                phase: 'ENTRY',
+                status: 'reserved', // reserved | parked | exit_ready
+                expiresAt: Date.now() + 30 * 60 * 1000,
+                timestamp: new Date().toISOString()
+            };
+
+            db.bookings[currentUser.email] = booking;
+            addLog('SLOT_RESERVED', `${plate} reserved by ${currentUser.name}`, slot.id);
+            saveDatabase();
+            refreshCurrentUI();
+            showToast('Slot Reserved!', `Slot ${slot.id} held for 30 mins. Real Entry QR generated!`, 'success');
+        }
+
+        function renderUserActivePass(booking) {
+            const banner = document.getElementById('upass-banner');
+            const tag = document.getElementById('upass-status-tag');
+            const timerBox = document.getElementById('upass-timer-box');
+            const qrBadge = document.getElementById('upass-qr-phase-badge');
+            const wayfindingBox = document.getElementById('upass-wayfinding-box');
+            const wayfindingList = document.getElementById('upass-wayfinding-list');
+            const actionsDiv = document.getElementById('upass-action-buttons');
+
+            document.getElementById('upass-slot-heading').textContent = `LANE ${booking.lane} • ${booking.slot}`;
+            document.getElementById('upass-booking-id').textContent = `#${booking.bookingId}`;
+
+            // Construct structured JSON payload for genuine QR code scanning
+            const qrPayloadObj = {
+                system: 'SmartFleet-VPMS',
+                bookingId: booking.bookingId,
+                userEmail: booking.userEmail,
+                vehiclePlate: booking.vehiclePlate,
+                vehicleType: booking.vehicleType,
+                lane: booking.lane,
+                slot: booking.slot,
+                phase: booking.phase,
+                timestamp: booking.timestamp
+            };
+            currentQRPayloadString = JSON.stringify(qrPayloadObj);
+
+            // Render real scannable QR code using QRCode.js
+            const qrTarget = document.getElementById('qr-code-target');
+            qrTarget.innerHTML = '';
+            new QRCode(qrTarget, {
+                text: currentQRPayloadString,
+                width: 176,
+                height: 176,
+                colorDark: '#0f172a',
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.M
+            });
+
+            if (booking.status === 'reserved') {
+                banner.className = 'bg-amber-500 text-slate-950 px-6 py-4 flex items-center justify-between';
+                tag.textContent = 'RESERVED • 30-MIN GRACE ACTIVE';
+                timerBox.classList.remove('hidden');
+                wayfindingBox.classList.add('hidden');
+                qrBadge.className = 'inline-block text-[11px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded bg-amber-100 text-amber-900';
+                qrBadge.textContent = 'SCANNABLE ENTRY QR PASS';
+
+                startUserGraceCountdown(booking);
+
+                actionsDiv.innerHTML = `
+                    <button onclick="processUserGateEntry()" class="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow transition flex items-center justify-center gap-2">
+                        <i data-lucide="scan-line" class="w-4 h-4"></i>
+                        <span>Simulate Entrance Gate QR Scan</span>
+                    </button>
+                    <button onclick="cancelUserBooking()" class="w-full py-2 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition">
+                        Cancel Reservation
+                    </button>
+                `;
+            } else if (booking.status === 'parked') {
+                clearInterval(userGraceTimer);
+                banner.className = 'bg-emerald-600 text-white px-6 py-4 flex items-center justify-between';
+                tag.textContent = 'GATE VERIFIED • VEHICLE PARKED';
+                timerBox.classList.add('hidden');
+                wayfindingBox.classList.remove('hidden');
+                qrBadge.className = 'inline-block text-[11px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded bg-emerald-100 text-emerald-900';
+                qrBadge.textContent = 'ACTIVE PARKING PASS QR';
+
+                wayfindingList.innerHTML = booking.lane === 'A'
+                    ? `<li>Drive straight 30m past the <strong>North Gate Scanner</strong>.</li>
+                       <li>Turn <strong>Left</strong> into <span class="font-mono bg-white px-1 rounded">LANE A (CARS)</span>.</li>
+                       <li>Park at <strong>Slot ${booking.slot}</strong> (indicator turns red).</li>`
+                    : `<li>Take the right-side two-wheeler lane at <strong>North Gate</strong>.</li>
+                       <li>Enter covered <span class="font-mono bg-white px-1 rounded">LANE B (BIKES)</span>.</li>
+                       <li>Park at <strong>Slot ${booking.slot}</strong>.</li>`;
+
+                actionsDiv.innerHTML = `
+                    <button onclick="requestUserExitQR()" class="w-full py-3 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow transition flex items-center justify-center gap-2">
+                        <i data-lucide="log-out" class="w-4 h-4 text-cyan-400"></i>
+                        <span>Request Exit & Generate Exit QR Code</span>
+                    </button>
+                `;
+            } else if (booking.status === 'exit_ready') {
+                clearInterval(userGraceTimer);
+                banner.className = 'bg-indigo-600 text-white px-6 py-4 flex items-center justify-between';
+                tag.textContent = 'EXIT QR GENERATED • READY TO LEAVE';
+                timerBox.classList.add('hidden');
+                wayfindingBox.classList.add('hidden');
+                qrBadge.className = 'inline-block text-[11px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded bg-indigo-100 text-indigo-900';
+                qrBadge.textContent = 'SCANNABLE EXIT QR PASS';
+
+                actionsDiv.innerHTML = `
+                    <button onclick="processUserGateExit()" class="w-full py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow transition flex items-center justify-center gap-2">
+                        <i data-lucide="qr-code" class="w-4 h-4"></i>
+                        <span>Simulate Exit Gate QR Scan & Release Slot</span>
+                    </button>
+                `;
+            }
+            lucide.createIcons();
+        }
+
+        function startUserGraceCountdown(booking) {
+            clearInterval(userGraceTimer);
+            const tick = () => {
+                const remMs = booking.expiresAt - Date.now();
+                if (remMs <= 0) {
+                    clearInterval(userGraceTimer);
+                    expireUserBooking(booking);
+                    return;
+                }
+                const totalSec = Math.floor(remMs / 1000);
+                const m = Math.floor(totalSec / 60);
+                const s = totalSec % 60;
+                document.getElementById('upass-countdown').textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+                const pct = Math.min(100, Math.max(0, (remMs / (30 * 60 * 1000)) * 100));
+                document.getElementById('upass-progress').style.width = `${pct}%`;
+            };
+            tick();
+            userGraceTimer = setInterval(tick, 1000);
+        }
+
+        function fastForwardUserTimeout() {
+            const booking = db.bookings[currentUser.email];
+            if (!booking || booking.status !== 'reserved') return;
+            expireUserBooking(booking);
+        }
+
+        function expireUserBooking(booking) {
+            const slot = db.slots.find(s => s.id === booking.slot);
+            if (slot) {
+                slot.status = 'available';
+                slot.vehicleNo = null;
+                slot.driverEmail = null;
+                slot.driverName = null;
+            }
+            delete db.bookings[currentUser.email];
+            addLog('TIMEOUT_AUTO_CANCEL', `${booking.vehiclePlate} exceeded 30m window`, booking.slot);
+            saveDatabase();
+            refreshCurrentUI();
+            showToast('Reservation Auto-Cancelled', `30-minute window expired. Slot ${booking.slot} released.`, 'danger');
+        }
+
+        function processUserGateEntry() {
+            const booking = db.bookings[currentUser.email];
+            if (!booking) return;
+            booking.status = 'parked';
+            booking.phase = 'PARKED';
+            booking.timestamp = new Date().toISOString();
+
+            const slot = db.slots.find(s => s.id === booking.slot);
+            if (slot) slot.status = 'occupied';
+
+            addLog('ENTRY_QR_VERIFIED', `${booking.vehiclePlate} entered Lane ${booking.lane}`, booking.slot);
+            saveDatabase();
+            refreshCurrentUI();
+            showToast('Entrance QR Verified!', `Boom barrier opened. Proceed to Lane ${booking.lane}, Slot ${booking.slot}.`, 'success');
+        }
+
+        function requestUserExitQR() {
+            const booking = db.bookings[currentUser.email];
+            if (!booking) return;
+            booking.status = 'exit_ready';
+            booking.phase = 'EXIT';
+            booking.timestamp = new Date().toISOString();
+            saveDatabase();
+            refreshCurrentUI();
+            showToast('Exit QR Generated', 'Present this new Exit QR pass at the exit gate.', 'info');
+        }
+
+        function processUserGateExit() {
+            const booking = db.bookings[currentUser.email];
+            if (!booking) return;
+
+            const slot = db.slots.find(s => s.id === booking.slot);
+            if (slot) {
+                slot.status = 'available';
+                slot.vehicleNo = null;
+                slot.driverEmail = null;
+                slot.driverName = null;
+            }
+            delete db.bookings[currentUser.email];
+            addLog('EXIT_QR_VERIFIED', `${booking.vehiclePlate} exited & slot freed`, booking.slot);
+            saveDatabase();
+            refreshCurrentUI();
+            showToast('Exit Verified!', `Slot ${booking.slot} is now empty. Have a safe drive!`, 'success');
+        }
+
+        function cancelUserBooking() {
+            const booking = db.bookings[currentUser.email];
+            if (!booking) return;
+            const slot = db.slots.find(s => s.id === booking.slot);
+            if (slot) {
+                slot.status = 'available';
+                slot.vehicleNo = null;
+                slot.driverEmail = null;
+                slot.driverName = null;
+            }
+            delete db.bookings[currentUser.email];
+            addLog('USER_CANCELLED', `${booking.vehiclePlate} cancelled reservation`, booking.slot);
+            saveDatabase();
+            refreshCurrentUI();
+            showToast('Reservation Cancelled', 'Slot returned to available pool.', 'info');
+        }
+
+        function copyCurrentQRPayload() {
+            if (!currentQRPayloadString) return;
+            const temp = document.createElement('textarea');
+            temp.value = currentQRPayloadString;
+            document.body.appendChild(temp);
+            temp.select();
+            document.execCommand('copy');
+            document.body.removeChild(temp);
+            showToast('QR JSON Payload Copied', 'You can paste this payload in the Admin Gate Scanner to verify.', 'success');
+        }
+
+        // =========================================================================
+        // 4. USER OFFICE CAB VIEW, EMAIL INBOX & FEEDBACK
+        // =========================================================================
+        function renderUserCabView() {
+            document.getElementById('user-inbox-email').textContent = currentUser.email;
+
+            // Find cab assigned specifically to logged-in user's Email ID
+            const myCab = db.cabs.find(c => c.commuterEmail.toLowerCase() === currentUser.email.toLowerCase());
+
+            if (myCab) {
+                document.getElementById('ucab-badge').textContent = '● Assigned Office Cab Active';
+                document.getElementById('ucab-badge').className = 'text-xs font-extrabold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg';
+                document.getElementById('ucab-bay').textContent = `LANE C • ${myCab.slotId}`;
+                document.getElementById('ucab-id').textContent = `${myCab.cabId} • ${myCab.pickupTime || 'Scheduled'}`;
+                document.getElementById('ucab-plate').textContent = myCab.plate;
+                document.getElementById('ucab-driver').textContent = myCab.driverName;
+                document.getElementById('ucab-route').textContent = myCab.route;
+                document.getElementById('ucab-status').textContent = myCab.status;
+                document.getElementById('usvg-cab-label').textContent = myCab.cabId;
+            } else {
+                document.getElementById('ucab-badge').textContent = '● No Cab Assigned Yet';
+                document.getElementById('ucab-badge').className = 'text-xs font-extrabold uppercase tracking-wider text-slate-600 bg-slate-100 px-2.5 py-1 rounded-lg';
+                document.getElementById('ucab-bay').textContent = 'Awaiting Admin Schedule';
+                document.getElementById('ucab-id').textContent = '—';
+                document.getElementById('ucab-plate').textContent = '—';
+                document.getElementById('ucab-driver').textContent = '—';
+                document.getElementById('ucab-route').textContent = '—';
+                document.getElementById('ucab-status').textContent = 'Not Scheduled';
+                document.getElementById('usvg-cab-label').textContent = 'STANDBY';
+            }
+
+            // Render Email Notifications received by this user
+            const myEmails = (db.sentEmails || []).filter(m => m.toEmail.toLowerCase() === currentUser.email.toLowerCase());
+            document.getElementById('user-inbox-count').textContent = `${myEmails.length} Mail${myEmails.length === 1 ? '' : 's'}`;
+            const inboxDiv = document.getElementById('user-email-inbox-list');
+            inboxDiv.innerHTML = '';
+
+            if (myEmails.length === 0) {
+                inboxDiv.innerHTML = `<p class="text-xs text-slate-400 italic py-3 text-center">No cab schedule email notifications received yet.</p>`;
+            } else {
+                myEmails.forEach(mail => {
+                    const card = document.createElement('div');
+                    card.className = 'bg-cyan-50/70 border border-cyan-200 rounded-xl p-3 text-xs space-y-1';
+                    card.innerHTML = `
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-cyan-950">${mail.subject}</span>
+                            <span class="font-mono text-[10px] text-slate-500">${mail.sentAt}</span>
+                        </div>
+                        <p class="text-slate-700 whitespace-pre-line leading-relaxed text-[11px]">${mail.body}</p>
+                    `;
+                    inboxDiv.appendChild(card);
+                });
+            }
+        }
+
+        // --- ADMIN SLOTS MANAGEMENT ---
+        function renderAdminSlotsTable() {
+            const tbody = document.getElementById('admin-slots-tbody');
+            tbody.innerHTML = '';
+
+            db.slots.forEach(slot => {
+            // Render Feedback
+            const fbDiv = document.getElementById('admin-feedback-list');
+            fbDiv.innerHTML = '';
+            if (db.feedbacks.length === 0) {
+                fbDiv.innerHTML = `<p class="text-xs text-slate-400 italic py-4 text-center">No user feedback submitted yet.</p>`;
+            } else {
+                db.feedbacks.forEach(f => {
+                    const stars = '★'.repeat(f.rating) + '☆'.repeat(5 - f.rating);
+                    const item = document.createElement('div');
+                    item.className = 'bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs';
+                    item.innerHTML = `
+                        <div class="flex justify-between font-bold text-slate-900 mb-1">
+                            <span>${f.user}</span>
+                            <span class="text-amber-500">${stars}</span>
+                        </div>
+                        <p class="text-slate-600">${f.comment}</p>
+                    `;
+                    fbDiv.appendChild(item);
+                });
+            }
+
+            renderAdminChart();
+        }
+        // --- ADMIN SLOTS MANAGEMENT (FULL EDIT & RESET ALL TO AVAILABLE) ---
+        function renderAdminSlotsTable() {
+            const tbody = document.getElementById('admin-slots-tbody');
+            tbody.innerHTML = '';
+
+            db.slots.forEach(slot => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50';
+                tr.innerHTML = `
+                    <td class="py-3 px-4 font-mono font-extrabold text-slate-900">${slot.id}</td>
+                    <td class="py-3 px-4">Lane ${slot.lane} (${slot.type.toUpperCase()})</td>
+                    <td class="py-3 px-4">
+                        <select onchange="adminChangeSlotStatus('${slot.id}', this.value)" class="rounded-lg border border-slate-300 px-2.5 py-1 text-xs font-bold bg-white">
+                            <option value="available" ${slot.status === 'available' ? 'selected' : ''}>Available</option>
+                            <option value="reserved" ${slot.status === 'reserved' ? 'selected' : ''}>Reserved</option>
+                            <option value="occupied" ${slot.status === 'occupied' ? 'selected' : ''}>Occupied</option>
+                            <option value="cab" ${slot.status === 'cab' ? 'selected' : ''}>Office Cab</option>
+                            <option value="maintenance" ${slot.status === 'maintenance' ? 'selected' : ''}>Maintenance</option>
+                        </select>
+                    </td>
+                    <td class="py-3 px-4">
+                        <div class="flex flex-wrap items-center gap-1.5">
+                            <input type="text" id="edit-plate-${slot.id}" value="${slot.vehicleNo || ''}" placeholder="Vehicle Plate" class="w-28 rounded-lg border border-slate-200 px-2 py-1 text-[11px] font-mono uppercase">
+                            <input type="text" id="edit-driver-${slot.id}" value="${slot.driverName || ''}" placeholder="Driver Name" class="w-28 rounded-lg border border-slate-200 px-2 py-1 text-[11px]">
+                            <button onclick="adminSaveSlotDetails('${slot.id}')" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-950 text-white text-[10px] font-bold">Save</button>
+                        </div>
+                    </td>
+                    <td class="py-3 px-4 text-right space-x-1.5">
+                        ${slot.status !== 'available' ? `<button onclick="adminForceReleaseSlot('${slot.id}')" class="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold">Set Available</button>` : ''}
+                        <button onclick="adminDeleteSlot('${slot.id}')" class="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold">Delete</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function adminSaveSlotDetails(slotId) {
+            const slot = db.slots.find(s => s.id === slotId);
+            if (!slot) return;
+            const plate = document.getElementById(`edit-plate-${slotId}`).value.trim().toUpperCase();
+            const driver = document.getElementById(`edit-driver-${slotId}`).value.trim();
+            slot.vehicleNo = plate || null;
+            slot.driverName = driver || null;
+            if (plate && slot.status === 'available') {
+                slot.status = slot.lane === 'C' ? 'cab' : 'occupied';
+            }
+            addLog('ADMIN_EDIT_SLOT', `Updated ${slotId} (${plate || 'Empty'})`, slotId);
+            saveDatabase();
+            refreshCurrentUI();
+            showToast('Slot Details Saved', `Updated assignment for ${slotId}.`, 'success');
+        }
+
+        function adminResetAllSlotsToAvailable() {
+            db.slots.forEach(s => {
+                s.status = 'available';
+                s.vehicleNo = null;
+                s.driverEmail = null;
+                s.driverName = null;
+            });
+            db.bookings = {};
+            db.cabs = [];
+            addLog('ADMIN_RESET_ALL_SLOTS', 'Reset all parking slots across Lanes A, B, C to AVAILABLE', 'ALL');
+            saveDatabase();
+            refreshCurrentUI();
+            showToast('All Slots Available', 'Every slot across Lanes A, B, and C has been reset to Available.', 'success');
+        }
+        // --- ADMIN USERS & ACCOUNTS MANAGEMENT (CREATE / EDIT / DELETE WITH MOBILE & EMAIL) ---
+        function renderAdminUsersTable() {
+            const tbody = document.getElementById('admin-users-tbody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            document.getElementById('auser-total-badge').textContent = `${db.users.length} Account${db.users.length === 1 ? '' : 's'}`;
+
+            db.users.forEach((u, idx) => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50';
+                const roleBadge = u.role === 'admin'
+                    ? '<span class="px-2 py-0.5 rounded bg-cyan-100 text-cyan-900 font-extrabold text-[10px] uppercase">ADMIN</span>'
+                    : '<span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-900 font-extrabold text-[10px] uppercase">USER</span>';
+
+                tr.innerHTML = `
+                    <td class="py-3 px-3">
+                        <p class="font-bold text-slate-900">${u.name}</p>
+                        <div class="mt-0.5">${roleBadge}</div>
+                    </td>
+                    <td class="py-3 px-3 font-mono text-[11px]">
+                        <p class="text-slate-800 font-semibold">${u.email}</p>
+                        <p class="text-slate-500 mt-0.5">${u.mobile || 'No mobile set'}</p>
+                    </td>
+                    <td class="py-3 px-3 font-mono text-xs">
+                        <span class="font-bold text-slate-800">${u.plate}</span>
+                        <span class="text-slate-400 block text-[10px] uppercase">${u.vehicleType}</span>
+                    </td>
+                    <td class="py-3 px-3 text-right space-x-1.5">
+                        <button onclick="adminLoadUserForEdit(${idx})" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold">Edit</button>
+                        ${u.email !== currentUser.email ? `<button onclick="adminDeleteUser(${idx})" class="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold">Delete</button>` : ''}
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function adminLoadUserForEdit(idx) {
+            const u = db.users[idx];
+            if (!u) return;
+            document.getElementById('auser-form-title').textContent = `Edit Account: ${u.name}`;
+            document.getElementById('auser-cancel-edit').classList.remove('hidden');
+            document.getElementById('auser-edit-original-email').value = u.email;
+            document.getElementById('auser-name').value = u.name;
+            document.getElementById('auser-role').value = u.role;
+            document.getElementById('auser-email').value = u.email;
+            document.getElementById('auser-mobile').value = u.mobile || '';
+            document.getElementById('auser-password').value = u.password;
+            document.getElementById('auser-vtype').value = u.vehicleType || 'car';
+            document.getElementById('auser-plate').value = u.plate || '';
+            document.getElementById('auser-submit-btn').innerHTML = `<i data-lucide="save" class="w-4 h-4 text-emerald-400"></i><span>Save Account Changes</span>`;
+            lucide.createIcons();
+        }
+
+        function resetAdminUserForm() {
+            document.getElementById('auser-form-title').textContent = 'Create New User Account';
+            document.getElementById('auser-cancel-edit').classList.add('hidden');
+            document.getElementById('auser-edit-original-email').value = '';
+            document.getElementById('auser-name').value = '';
+            document.getElementById('auser-role').value = 'user';
+            document.getElementById('auser-email').value = '';
+            document.getElementById('auser-mobile').value = '';
+            document.getElementById('auser-password').value = '';
+            document.getElementById('auser-vtype').value = 'car';
+            document.getElementById('auser-plate').value = '';
+            document.getElementById('auser-submit-btn').innerHTML = `<i data-lucide="user-plus" class="w-4 h-4 text-emerald-400"></i><span>Create User Account</span>`;
+            lucide.createIcons();
+        }
+
+        function handleAdminSaveUser(e) {
+            e.preventDefault();
+            const origEmail = document.getElementById('auser-edit-original-email').value.trim().toLowerCase();
+            const name = document.getElementById('auser-name').value.trim();
+            const role = document.getElementById('auser-role').value;
+            const email = document.getElementById('auser-email').value.trim().toLowerCase();
+            const mobile = document.getElementById('auser-mobile').value.trim();
+            const password = document.getElementById('auser-password').value.trim();
+            const vehicleType = document.getElementById('auser-vtype').value;
+            const plate = document.getElementById('auser-plate').value.trim().toUpperCase();
+
+            const userObj = { name, email, mobile, password, role, vehicleType, plate };
+
+            if (origEmail) {
+                const idx = db.users.findIndex(u => u.email.toLowerCase() === origEmail);
+                if (idx >= 0) {
+                    db.users[idx] = userObj;
+                    addLog('ADMIN_EDIT_USER', `Updated account ${name} (${email} / ${mobile})`, '-');
+                    showToast('Account Updated', `${name}'s profile, email, and mobile saved.`, 'success');
+                }
+            } else {
+                if (db.users.some(u => u.email.toLowerCase() === email)) {
+                    showToast('Duplicate Email ID', 'An account with this Email ID already exists.', 'warning');
+                    return;
+                }
+                db.users.push(userObj);
+                addLog('ADMIN_CREATE_USER', `Created ${role} account for ${name} (${email})`, '-');
+                showToast('User Account Created', `${name} (${email}) can now log in.`, 'success');
+            }
+
+            resetAdminUserForm();
+            saveDatabase();
+            refreshCurrentUI();
+        }
+
+        function adminDeleteUser(idx) {
+            const target = db.users[idx];
+            if (!target) return;
+            db.users.splice(idx, 1);
+            addLog('ADMIN_DELETE_USER', `Removed account ${target.email}`, '-');
+            saveDatabase();
+            refreshCurrentUI();
+            showToast('Account Deleted', `Removed ${target.email}.`, 'info');
+        }
+
+        // --- ADMIN OFFICE CAB SCHEDULING & EMAIL NOTIFICATION DISPATCH ---
+        function renderAdminCabsAndEmails() {
+            // Populate Commuter Picker Dropdown from Registered Users
+            const picker = document.getElementById('acab-user-picker');
+            if (picker) {
+                const prevVal = picker.value;
+                picker.innerHTML = `<option value="">-- Select Registered User (Auto-Fill Email & Mobile) --</option>`;
+                db.users.filter(u => u.role === 'user').forEach(u => {
+                    const opt = document.createElement('option');
+                    opt.value = u.email;
+                    opt.textContent = `${u.name} • ${u.email} • ${u.mobile || 'No Mobile'}`;
+                    picker.appendChild(opt);
+                });
+                picker.value = prevVal;
+            }
+
+            // Populate Lane C Slot selector
+            const slotSel = document.getElementById('acab-slot');
+            const cSlots = db.slots.filter(s => s.lane === 'C');
+            slotSel.innerHTML = '';
+            cSlots.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.id;
+                opt.textContent = `Lane C • ${s.id} (${s.status.toUpperCase()})`;
+                slotSel.appendChild(opt);
+            });
+
+            // Cabs Table
+            const cabsBody = document.getElementById('admin-cabs-tbody');
+            cabsBody.innerHTML = '';
+            if (db.cabs.length === 0) {
+                cabsBody.innerHTML = `<tr><td colspan="5" class="py-5 text-center text-slate-400 italic">No office cabs scheduled yet. Use the form on the left to assign a cab.</td></tr>`;
+            } else {
+                db.cabs.forEach((cab, idx) => {
+                    const tr = document.createElement('tr');
+                    tr.className = 'hover:bg-slate-50';
+                    tr.innerHTML = `
+                        <td class="py-2.5 px-3 font-mono font-bold text-slate-900">${cab.cabId}<br><span class="text-cyan-700">Lane C • ${cab.slotId}</span></td>
+                        <td class="py-2.5 px-3">${cab.driverName}<br><span class="font-mono text-[10px] text-slate-500">${cab.plate}</span></td>
+                        <td class="py-2.5 px-3 text-[11px]">
+                            <strong>${cab.commuterName || 'Commuter'}</strong><br>
+                            <span class="font-mono text-slate-600">${cab.commuterEmail}</span><br>
+                            <span class="font-mono text-slate-500">${cab.commuterMobile || ''}</span>
+                        </td>
+                        <td class="py-2.5 px-3">
+                            <span class="font-mono font-bold text-slate-800 block">${cab.pickupTime || ''}</span>
+                            <span class="px-2 py-0.5 rounded bg-cyan-50 text-cyan-800 font-bold text-[10px]">${cab.status}</span>
+                        </td>
+                        <td class="py-2.5 px-3 text-right space-x-1">
+                            <button onclick="adminLoadCabToEdit(${idx})" class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 font-bold text-slate-700">Edit</button>
+                            <button onclick="adminRemoveCab(${idx})" class="px-2 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 font-bold text-rose-700">Release</button>
+                        </td>
+                    `;
+                    cabsBody.appendChild(tr);
+                });
+            }
+
+            // Sent Emails Log
+            const emailsList = document.getElementById('admin-sent-emails-list');
+            const emails = db.sentEmails || [];
+            document.getElementById('admin-email-count').textContent = `${emails.length} Sent`;
+            emailsList.innerHTML = '';
+
+            if (emails.length === 0) {
+                emailsList.innerHTML = `<p class="text-xs text-slate-400 italic py-4 text-center">No email notifications dispatched yet.</p>`;
+            } else {
+                emails.forEach(m => {
+                    const card = document.createElement('div');
+                    card.className = 'bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs space-y-1';
+                    card.innerHTML = `
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-slate-900">To: <span class="font-mono text-cyan-700">${m.toEmail}</span> (${m.toMobile || 'No mobile'})</span>
+                            <span class="font-mono text-[10px] text-slate-400">${m.sentAt}</span>
+                        </div>
+                        <p class="font-semibold text-slate-800">${m.subject}</p>
+                        <p class="text-[11px] text-slate-600 whitespace-pre-line">${m.body}</p>
+                    `;
+                    emailsList.appendChild(card);
+                });
+            }
+        }
+
+        function onSelectCommuterForCab(email) {
+            if (!email) return;
+            const u = db.users.find(user => user.email.toLowerCase() === email.toLowerCase());
+            if (!u) return;
+            document.getElementById('acab-commuter-name').value = u.name;
+            document.getElementById('acab-commuter-mobile').value = u.mobile || '';
+            document.getElementById('acab-commuter').value = u.email;
+        }
+
+        function adminLoadCabToEdit(idx) {
+            const c = db.cabs[idx];
+            if (!c) return;
+            document.getElementById('acab-commuter-name').value = c.commuterName || '';
+            document.getElementById('acab-commuter-mobile').value = c.commuterMobile || '';
+            document.getElementById('acab-commuter').value = c.commuterEmail || '';
+            document.getElementById('acab-id').value = c.cabId;
+            document.getElementById('acab-slot').value = c.slotId;
+            document.getElementById('acab-driver').value = c.driverName;
+            document.getElementById('acab-plate').value = c.plate;
+            document.getElementById('acab-time').value = c.pickupTime || '06:30 PM';
+            document.getElementById('acab-route').value = c.route;
+            document.getElementById('acab-status').value = c.status;
+        }
+
+        function adminRemoveCab(idx) {
+            const cab = db.cabs[idx];
+            if (!cab) return;
+            const slot = db.slots.find(s => s.id === cab.slotId);
+            if (slot) {
+                slot.status = 'available';
+                slot.vehicleNo = null;
+                slot.driverName = null;
+            }
+            db.cabs.splice(idx, 1);
+            addLog('ADMIN_CAB_RELEASED', `Released ${cab.cabId} from ${cab.slotId}`, cab.slotId);
+            saveDatabase();
+            refreshCurrentUI();
+            showToast('Cab Bay Released', `Slot ${cab.slotId} is now Available.`, 'info');
+        }
+
+        async function handleAdminSaveCab(e) {
+            e.preventDefault();
+            const commuterName = document.getElementById('acab-commuter-name').value.trim();
+            const commuterMobile = document.getElementById('acab-commuter-mobile').value.trim();
+            const commuterEmail = document.getElementById('acab-commuter').value.trim().toLowerCase();
+            const cabId = document.getElementById('acab-id').value.trim().toUpperCase();
+            const slotId = document.getElementById('acab-slot').value;
+            const driverName = document.getElementById('acab-driver').value.trim();
+            const plate = document.getElementById('acab-plate').value.trim().toUpperCase();
+            const pickupTime = document.getElementById('acab-time').value.trim();
+            const route = document.getElementById('acab-route').value.trim();
+            const status = document.getElementById('acab-status').value;
+
+            const existingIdx = db.cabs.findIndex(c => c.cabId === cabId);
+            const cabObj = { cabId, slotId, driverName, plate, pickupTime, route, status, commuterName, commuterMobile, commuterEmail };
+
+            if (existingIdx >= 0) db.cabs[existingIdx] = cabObj;
+            else db.cabs.push(cabObj);
+
+            const slot = db.slots.find(s => s.id === slotId);
+            if (slot) {
+                slot.status = 'cab';
+                slot.vehicleNo = plate;
+                slot.driverName = `${driverName} (${cabId})`;
+            }
+
+            // Build formatted Email Notification
+            const subject = `SmartFleet VPMS: Office Cab ${cabId} Scheduled (Lane C • ${slotId})`;
+            const body = `Hello ${commuterName},\n\nYour corporate office cab has been scheduled and assigned:\n• Cab ID & Plate: ${cabId} (${plate})\n• Pickup Bay Location: Lane C • Slot ${slotId}\n• Scheduled Time: ${pickupTime}\n• Driver Details: ${driverName}\n• Route: ${route}\n• Live Tracking Portal: https://smartfleet.services\n\nPlease board at Lane C, Slot ${slotId} on time.\n— SmartFleet Services Transport Desk`;
+
+            const mailRecord = {
+                toEmail: commuterEmail,
+                toMobile: commuterMobile,
+                subject,
+                body,
+                sentAt: new Date().toTimeString().slice(0, 8)
+            };
+            if (!db.sentEmails) db.sentEmails = [];
+            db.sentEmails.unshift(mailRecord);
+
+            addLog('CAB_SCHEDULED_EMAIL_SENT', `${cabId} (${plate}) assigned to ${commuterEmail}`, slotId);
+            saveDatabase();
+            refreshCurrentUI();
+
+            // Optional Webhook POST if Admin configured an Email Webhook URL
+            const webhookUrl = localStorage.getItem(EMAIL_WEBHOOK_KEY);
+            if (webhookUrl) {
+                try {
+                    fetch(webhookUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ to: commuterEmail, mobile: commuterMobile, subject, message: body, cab: cabObj })
+                    });
+                } catch (err) { console.warn('Webhook error:', err); }
+            }
+
+            // Show Email Dispatch Modal with direct mailto: trigger
+            openEmailDispatchModal(mailRecord);
+        }
+
+        function openEmailDispatchModal(mail) {
+            document.getElementById('modal-email-to').textContent = mail.toEmail;
+            document.getElementById('modal-email-mobile').textContent = mail.toMobile || 'N/A';
+            document.getElementById('modal-email-subject').textContent = mail.subject;
+            document.getElementById('modal-email-body').textContent = mail.body;
+            document.getElementById('modal-mailto-link').href = `mailto:${encodeURIComponent(mail.toEmail)}?subject=${encodeURIComponent(mail.subject)}&body=${encodeURIComponent(mail.body)}`;
+            document.getElementById('email-dispatch-modal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closeEmailDispatchModal() {
+            document.getElementById('email-dispatch-modal').classList.add('hidden');
+        }
+
+        // =========================================================================
+        // 6. CAMERA QR SCANNER, HELPERS & SETTINGS
+        // =========================================================================
+        async function toggleCameraScanner() {
+            const box = document.getElementById('admin-camera-box');
+            const video = document.getElementById('admin-qr-video');
+            if (!box.classList.contains('hidden')) {
+                stopCameraScanner();
+                return;
+            }
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                showToast('Camera Unavailable', 'Use Paste Payload or Auto-Load Latest Pass on this device.', 'warning');
+                return;
+            }
+            try {
+                cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+                video.srcObject = cameraStream;
+                await video.play();
+                box.classList.remove('hidden');
+
+                if ('BarcodeDetector' in window) {
+                    const detector = new BarcodeDetector({ formats: ['qr_code'] });
+                    const scanLoop = async () => {
+                        if (!cameraStream) return;
+                        try {
+                            const codes = await detector.detect(video);
+                            if (codes.length > 0) {
+                                document.getElementById('admin-qr-input').value = codes[0].rawValue;
+                                stopCameraScanner();
+                                verifyAdminQRPayload();
+                                return;
+                            }
+                        } catch (e) {}
+                        requestAnimationFrame(scanLoop);
+                    };
+                    requestAnimationFrame(scanLoop);
+                }
+            } catch (err) {
+                showToast('Camera Permission Denied', 'Allow camera access or paste QR payload manually.', 'danger');
+            }
+        }
+
+        function stopCameraScanner() {
+            const box = document.getElementById('admin-camera-box');
+            const video = document.getElementById('admin-qr-video');
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(t => t.stop());
+                cameraStream = null;
+            }
+            if (video) video.srcObject = null;
+            if (box) box.classList.add('hidden');
+        }
+
+        function adminChangeSlotStatus(slotId, newStatus) {
+            const slot = db.slots.find(s => s.id === slotId);
+            if (!slot) return;
+            slot.status = newStatus;
+            if (newStatus === 'available') {
+                if (slot.driverEmail && db.bookings[slot.driverEmail]) {
+                    delete db.bookings[slot.driverEmail];
+                }
+                slot.vehicleNo = null;
+                slot.driverEmail = null;
+                slot.driverName = null;
+            }
+            addLog('ADMIN_SLOT_STATUS', `Set to ${newStatus.toUpperCase()}`, slotId);
+            saveDatabase();
+            refreshCurrentUI();
+            showToast('Slot Updated', `Slot ${slotId} is now ${newStatus.toUpperCase()}.`, 'info');
+        }
+
+        function adminForceReleaseSlot(slotId) {
+            adminChangeSlotStatus(slotId, 'available');
+        }
+
+        function adminDeleteSlot(slotId) {
+            db.slots = db.slots.filter(s => s.id !== slotId);
+            addLog('ADMIN_DELETE_SLOT', `Removed slot from facility`, slotId);
+            saveDatabase();
+            refreshCurrentUI();
+            showToast('Slot Removed', `Slot ${slotId} deleted.`, 'info');
+        }
+
+        // --- ADMIN OFFICE CAB ALLOCATION & USERS ---
+        function renderAdminCabsAndUsers() {
+            // Populate Lane C Slot selector
+            const slotSel = document.getElementById('acab-slot');
+            const cSlots = db.slots.filter(s => s.lane === 'C');
+            slotSel.innerHTML = '';
+            cSlots.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.id;
+                opt.textContent = `Lane C • ${s.id} (${s.status})`;
+                slotSel.appendChild(opt);
+            });
+
+            // Cabs Table
+            const cabsBody = document.getElementById('admin-cabs-tbody');
+            cabsBody.innerHTML = '';
+            db.cabs.forEach((cab, idx) => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50';
+                tr.innerHTML = `
+                    <td class="py-2.5 px-3 font-mono font-bold text-slate-900">${cab.cabId}</td>
+                    <td class="py-2.5 px-3 font-mono font-bold text-cyan-700">${cab.slotId}</td>
+                    <td class="py-2.5 px-3">${cab.driverName}<br><span class="font-mono text-[10px] text-slate-500">${cab.plate}</span></td>
+                    <td class="py-2.5 px-3 font-mono text-[11px]">${cab.commuterEmail}</td>
+                    <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded bg-cyan-50 text-cyan-800 font-bold text-[10px]">${cab.status}</span></td>
+                    <td class="py-2.5 px-3 text-right">
+                        <button onclick="adminLoadCabToEdit(${idx})" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 font-bold text-slate-700">Edit</button>
+                    </td>
+                `;
+                cabsBody.appendChild(tr);
+            });
+
+            // Users Table
+            const usersBody = document.getElementById('admin-users-tbody');
+            usersBody.innerHTML = '';
+            db.users.forEach(u => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="py-2 px-3 font-semibold text-slate-800">${u.name}</td>
+                    <td class="py-2 px-3 font-mono text-slate-600">${u.email}</td>
+                    <td class="py-2 px-3 font-mono">${u.plate} (${u.vehicleType})</td>
+                    <td class="py-2 px-3 uppercase font-bold text-[10px]">${u.role}</td>
+                `;
+                usersBody.appendChild(tr);
+            });
+        }
+
+        function adminLoadCabToEdit(idx) {
+            const c = db.cabs[idx];
+            if (!c) return;
+            document.getElementById('acab-id').value = c.cabId;
+            document.getElementById('acab-slot').value = c.slotId;
+            document.getElementById('acab-driver').value = c.driverName;
+            document.getElementById('acab-plate').value = c.plate;
+            document.getElementById('acab-route').value = c.route;
+            document.getElementById('acab-status').value = c.status;
+            document.getElementById('acab-commuter').value = c.commuterEmail;
+        }
+
+        function handleAdminSaveCab(e) {
+            e.preventDefault();
+            const cabId = document.getElementById('acab-id').value.trim().toUpperCase();
+            const slotId = document.getElementById('acab-slot').value;
+            const driverName = document.getElementById('acab-driver').value.trim();
+            const plate = document.getElementById('acab-plate').value.trim().toUpperCase();
+            const route = document.getElementById('acab-route').value.trim();
+            const status = document.getElementById('acab-status').value;
+            const commuterEmail = document.getElementById('acab-commuter').value.trim().toLowerCase();
+
+            const existingIdx = db.cabs.findIndex(c => c.cabId === cabId);
+            const cabObj = { cabId, slotId, driverName, plate, route, status, commuterEmail };
+
+            if (existingIdx >= 0) db.cabs[existingIdx] = cabObj;
+            else db.cabs.push(cabObj);
+
+            const slot = db.slots.find(s => s.id === slotId);
+            if (slot) {
+                slot.status = 'cab';
+                slot.vehicleNo = plate;
+                slot.driverName = `${driverName} (${cabId})`;
+            }
+
+            addLog('ADMIN_CAB_ASSIGNED', `${cabId} (${plate}) → ${commuterEmail}`, slotId);
+            saveDatabase();
+            refreshCurrentUI();
+            showToast('Cab Allocation Saved', `${cabId} assigned to ${slotId} & commuter notified.`, 'success');
+        }
+
+        // =========================================================================
+        // 6. HELPERS, CLOUD SYNC MODAL & DATA EXPORT
+        // =========================================================================
+        function addLog(action, details, slot) {
+            const time = new Date().toTimeString().slice(0, 8);
+            db.logs.unshift({ time, action, details, slot });
+        }
+
+        function exportSystemJSON() {
+            const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(db, null, 2));
+            const a = document.createElement('a');
+            a.href = dataStr;
+            a.download = `smartfleet_vpms_backup_${Date.now()}.json`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            showToast('JSON Exported', 'System state downloaded.', 'success');
+        }
+
+        function resetDemoDatabase() {
+            db = getDefaultDatabase();
+            saveDatabase();
+            refreshCurrentUI();
+            showToast('Demo Reset Complete', 'All slots, cabs, and logs restored to initial defaults.', 'info');
+        }
+
+        function openCloudModal() {
+            document.getElementById('firebase-url-input').value = localStorage.getItem(FIREBASE_KEY) || '';
+            document.getElementById('email-webhook-input').value = localStorage.getItem(EMAIL_WEBHOOK_KEY) || '';
+            document.getElementById('cloud-modal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closeCloudModal() {
+            document.getElementById('cloud-modal').classList.add('hidden');
+        }
+
+        function saveFirebaseUrl() {
+            const url = document.getElementById('firebase-url-input').value.trim();
+            const webhook = document.getElementById('email-webhook-input').value.trim();
+            if (url) localStorage.setItem(FIREBASE_KEY, url);
+            else localStorage.removeItem(FIREBASE_KEY);
+
+            if (webhook) localStorage.setItem(EMAIL_WEBHOOK_KEY, webhook);
+            else localStorage.removeItem(EMAIL_WEBHOOK_KEY);
+
+            updateCloudBadge();
+            pushToFirebaseIfConfigured();
+            closeCloudModal();
+            showToast('Configuration Saved', 'Cloud sync and email webhook settings updated.', 'success');
+        }
+
+        function clearFirebaseUrl() {
+            localStorage.removeItem(FIREBASE_KEY);
+            localStorage.removeItem(EMAIL_WEBHOOK_KEY);
+            updateCloudBadge();
+            closeCloudModal();
+            showToast('Settings Reset', 'Switched back to local multi-tab sync.', 'info');
+        }
+
+        function closeCloudModal() {
+            document.getElementById('cloud-modal').classList.add('hidden');
+        }
+
+        function saveFirebaseUrl() {
+            const url = document.getElementById('firebase-url-input').value.trim();
+            if (!url) return;
+            localStorage.setItem(FIREBASE_KEY, url);
+            updateCloudBadge();
+            pushToFirebaseIfConfigured();
+            closeCloudModal();
+            showToast('Cloud Sync Connected', 'Live data will now sync across devices via Firebase.', 'success');
+        }
+
+        function clearFirebaseUrl() {
+            localStorage.removeItem(FIREBASE_KEY);
+            updateCloudBadge();
+            closeCloudModal();
+            showToast('Local Multi-Tab Sync Active', 'Switched back to browser localStorage sync.', 'info');
+        }
+
+        function updateCloudBadge() {
+            const pill = document.getElementById('sync-status-pill');
+            if (!pill) return;
+            if (localStorage.getItem(FIREBASE_KEY)) {
+                pill.textContent = '● CLOUD DB SYNC';
+                pill.className = 'inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30';
+            } else {
+                pill.textContent = '● MULTI-TAB SYNC';
+                pill.className = 'inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+            }
+        }
+
+        function showToast(title, message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const borderColors = {
+                success: 'border-emerald-500',
+                warning: 'border-amber-500',
+                danger: 'border-rose-500',
+                info: 'border-cyan-500'
+            };
+            const el = document.createElement('div');
+            el.className = `pointer-events-auto bg-slate-900 text-white border-l-4 ${borderColors[type] || borderColors.info} rounded-xl p-3.5 shadow-xl text-xs transition-all duration-300`;
+            el.innerHTML = `<p class="font-bold text-sm">${title}</p><p class="text-slate-300 mt-0.5">${message}</p>`;
+            container.appendChild(el);
+            setTimeout(() => {
+                el.style.opacity = '0';
+                setTimeout(() => el.remove(), 300);
+            }, 3800);
+        }
+    </script>
+</body>
+</html>oke-dashoffset: -24; }
+        }
+        .route-line {
+            stroke-dasharray: 6 6;
+            animation: dash-flow 1.2s linear infinite;
+        }
+        /* Ensure generated QR images scale crisply inside containers */
+        #qr-code-target img, #qr-code-target canvas {
+            margin: 0 auto;
+            border-radius: 0.5rem;
+            display: block !important;
+        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col">
+
+    <!-- Global Toast Notification Container -->
+    <div id="toast-container" class="fixed top-20 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none"></div>
+
+    <!-- ========================================================================= -->
+    <!-- 1. AUTHENTICATION SCREEN (LOGIN / REGISTER)                               -->
+    <!-- ========================================================================= -->
+    <div id="auth-screen" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-cyan-950 p-4">
+        <div class="max-w-4xl w-full bg-white rounded-3xl shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-12 border border-slate-800">
+            
+            <!-- Left Branding Panel -->
+            <div class="lg:col-span-5 bg-slate-900 text-white p-8 flex flex-col justify-between relative overflow-hidden">
+                <div class="relative z-10">
+                    <div class="inline-flex items-center gap-2.5 bg-gradient-to-r from-emerald-400 to-cyan-400 text-slate-950 font-extrabold px-3 py-1.5 rounded-xl text-sm shadow mb-6">
+                        <i data-lucide="car-front" class="w-4 h-4"></i>
+                        <span>smartfleet.services</span>
+                    </div>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight leading-tight">
+                        Vehicle Parking Management System
+                    </h1>
+                    <p class="text-slate-300 text-xs sm:text-sm mt-3 leading-relaxed">
+                        Automated corporate parking slot allocation, real-time dual-QR gate access, indoor lane guidance, and dedicated office cab GPS safety tracking.
+                    </p>
+
+                    <div class="mt-8 space-y-3 text-xs">
+                        <div class="flex items-center gap-2.5 text-emerald-300">
+                            <i data-lucide="qr-code" class="w-4 h-4 shrink-0"></i>
+                            <span>Genuine Scannable Entry & Exit QR Passes</span>
+                        </div>
+                        <div class="flex items-center gap-2.5 text-cyan-300">
+                            <i data-lucide="navigation" class="w-4 h-4 shrink-0"></i>
+                            <span>Office Cab Bay Allocation & Live GPS Telemetry</span>
+                        </div>
+                        <div class="flex items-center gap-2.5 text-amber-300">
+                            <i data-lucide="clock" class="w-4 h-4 shrink-0"></i>
+                            <span>Smart 30-Minute Auto-Release Grace Window</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="relative z-10 pt-8 mt-8 border-t border-slate-800 text-[11px] text-slate-400">
+                    <p class="font-semibold text-slate-300">JAIN (Deemed-to-be-University) • BCA Project</p>
+                    <p class="mt-0.5">Royston Jessal Furtado • Bhanuprakash • Dhanraj</p>
+                    <p class="text-slate-500">Guide: Prof. Saurav Digambar Jadhav</p>
+                </div>
+            </div>
+
+            <!-- Right Login / Signup Forms -->
+            <div class="lg:col-span-7 p-6 sm:p-10 flex flex-col justify-center">
                 <!-- Auth Mode Tabs -->
                 <div class="flex bg-slate-100 p-1 rounded-xl mb-6">
                     <button id="tab-login" onclick="switchAuthTab('login')" class="flex-1 py-2.5 text-xs sm:text-sm font-bold rounded-lg bg-white text-slate-900 shadow-sm transition">
