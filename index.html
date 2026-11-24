@@ -1,0 +1,1644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VPMS | Corporate Vehicle Parking & Office Cab Management System</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Chart.js for Admin Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        navy: {
+                            900: '#0a0f1c',
+                            800: '#111827',
+                            700: '#1e293b',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom subtle animations and scrollbar */
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); opacity: 0.8; }
+            100% { transform: scale(2.2); opacity: 0; }
+        }
+        .gps-pulse::before {
+            content: '';
+            position: absolute;
+            inset: -6px;
+            border-radius: 9999px;
+            background-color: rgba(6, 182, 212, 0.5);
+            animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        }
+        @keyframes dash-flow {
+            to { stroke-dashoffset: -24; }
+        }
+        .route-line {
+            stroke-dasharray: 6 6;
+            animation: dash-flow 1.2s linear infinite;
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col">
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed top-20 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none"></div>
+
+    <!-- Top Navigation Header -->
+    <header class="bg-slate-900 text-white sticky top-0 z-40 shadow-lg border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between py-3 gap-3">
+                <!-- Brand & Academic Tag -->
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-gradient-to-br from-emerald-400 to-cyan-500 p-2 rounded-xl shadow-md text-slate-950">
+                            <i data-lucide="car-front" class="w-6 h-6 stroke-[2.2]"></i>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h1 class="text-lg sm:text-xl font-extrabold tracking-tight text-white">VPMS <span class="text-cyan-400 font-semibold">SmartPark</span></h1>
+                                <span class="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                                    ● LIVE SYSTEM
+                                </span>
+                            </div>
+                            <p class="text-xs text-slate-400">Corporate Parking & Office Cab Automation</p>
+                        </div>
+                    </div>
+
+                    <!-- Project Credits Button (Mobile visible) -->
+                    <button onclick="openCreditsModal()" class="md:hidden p-2 rounded-lg bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 transition">
+                        <i data-lucide="info" class="w-5 h-5"></i>
+                    </button>
+                </div>
+
+                <!-- Role Switcher Navigation Pills -->
+                <nav class="flex items-center bg-slate-800/90 p-1 rounded-xl border border-slate-700/80 overflow-x-auto">
+                    <button id="nav-owner" onclick="switchRole('owner')" class="role-btn flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all whitespace-nowrap bg-emerald-500 text-slate-950 shadow">
+                        <i data-lucide="parking-square" class="w-4 h-4"></i>
+                        <span>Vehicle Owner</span>
+                    </button>
+                    <button id="nav-cab" onclick="switchRole('cab')" class="role-btn flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all whitespace-nowrap text-slate-300 hover:text-white">
+                        <i data-lucide="navigation" class="w-4 h-4"></i>
+                        <span>Office Cab & GPS</span>
+                        <span id="cab-badge" class="bg-cyan-500 text-slate-950 text-[10px] font-bold px-1.5 py-0.2 rounded-full">1</span>
+                    </button>
+                    <button id="nav-admin" onclick="switchRole('admin')" class="role-btn flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all whitespace-nowrap text-slate-300 hover:text-white">
+                        <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+                        <span>Admin Analytics</span>
+                    </button>
+                </nav>
+
+                <!-- Project Credits Button (Desktop) -->
+                <div class="hidden md:flex items-center gap-3">
+                    <button onclick="openCreditsModal()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium border border-slate-700 transition">
+                        <i data-lucide="graduation-cap" class="w-4 h-4 text-cyan-400"></i>
+                        <span>Project Synopsis Info</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Application Content -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <!-- ===================================================================== -->
+        <!-- VIEW 1: VEHICLE OWNER (EMPLOYEE / VISITOR)                            -->
+        <!-- ===================================================================== -->
+        <section id="view-owner" class="space-y-6">
+            <!-- Top Summary & Legend Bar -->
+            <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                        <i data-lucide="layout-grid" class="w-5 h-5 text-emerald-600"></i>
+                        Real-Time Corporate Parking Lot Map
+                    </h2>
+                    <p class="text-sm text-slate-500 mt-0.5">Select an available slot to reserve. Arrive within <span class="font-semibold text-amber-600">30 minutes</span> to verify your Entry QR Code.</p>
+                </div>
+
+                <!-- Live Counters & Status Legend -->
+                <div class="flex flex-wrap items-center gap-3 sm:gap-5 text-xs font-medium">
+                    <div class="flex items-center gap-2 bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-lg border border-emerald-200">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                        <span>Available: <strong id="count-available">0</strong></span>
+                    </div>
+                    <div class="flex items-center gap-2 bg-amber-50 text-amber-700 px-3 py-1.5 rounded-lg border border-amber-200">
+                        <span class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
+                        <span>Reserved (30m): <strong id="count-reserved">0</strong></span>
+                    </div>
+                    <div class="flex items-center gap-2 bg-rose-50 text-rose-700 px-3 py-1.5 rounded-lg border border-rose-200">
+                        <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+                        <span>Occupied: <strong id="count-occupied">0</strong></span>
+                    </div>
+                    <div class="flex items-center gap-2 bg-cyan-50 text-cyan-700 px-3 py-1.5 rounded-lg border border-cyan-200">
+                        <span class="w-2.5 h-2.5 rounded-full bg-cyan-500"></span>
+                        <span>Office Cabs: <strong id="count-cabs">0</strong></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main 2-Column Interactive Area -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+                <!-- LEFT COLUMN (7 cols): Interactive Lane & Slot Matrix -->
+                <div class="lg:col-span-7 space-y-5">
+
+                    <!-- Entrance Gate Banner -->
+                    <div class="bg-slate-900 text-white rounded-xl px-4 py-2.5 flex items-center justify-between text-xs font-mono shadow-sm">
+                        <div class="flex items-center gap-2">
+                            <span class="bg-emerald-500 text-slate-950 font-bold px-2 py-0.5 rounded">NORTH GATE</span>
+                            <span class="text-slate-300">QR Optical Scanner & Boom Barrier Active</span>
+                        </div>
+                        <span class="text-cyan-400 hidden sm:inline">▼ FOLLOW LANE SIGNAGE ▼</span>
+                    </div>
+
+                    <!-- LANE A: EMPLOYEE & VISITOR CARS -->
+                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+                        <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+                            <div class="flex items-center gap-2.5">
+                                <div class="bg-slate-900 text-white font-mono font-bold text-xs px-2.5 py-1.5 rounded-lg">LANE A</div>
+                                <div>
+                                    <h3 class="font-bold text-slate-900 text-sm sm:text-base">Four-Wheeler / Car Parking Zone</h3>
+                                    <p class="text-xs text-slate-500">Ground Level • East Wing • Slots A-01 to A-08</p>
+                                </div>
+                            </div>
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700" id="lane-a-stats">0/8 Free</span>
+                        </div>
+                        <div id="grid-lane-a" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            <!-- Populated dynamically by JS -->
+                        </div>
+                    </div>
+
+                    <!-- LANE B: TWO-WHEELERS / BIKES -->
+                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+                        <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+                            <div class="flex items-center gap-2.5">
+                                <div class="bg-slate-900 text-white font-mono font-bold text-xs px-2.5 py-1.5 rounded-lg">LANE B</div>
+                                <div>
+                                    <h3 class="font-bold text-slate-900 text-sm sm:text-base">Two-Wheeler / Bike Parking Zone</h3>
+                                    <p class="text-xs text-slate-500">Covered Shed • West Wing • Slots B-01 to B-08</p>
+                                </div>
+                            </div>
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700" id="lane-b-stats">0/8 Free</span>
+                        </div>
+                        <div id="grid-lane-b" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            <!-- Populated dynamically by JS -->
+                        </div>
+                    </div>
+
+                    <!-- LANE C: DEDICATED OFFICE CAB FLEET ZONE -->
+                    <div class="bg-gradient-to-br from-cyan-50/70 to-indigo-50/60 rounded-2xl p-5 shadow-sm border border-cyan-200">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-cyan-200/70">
+                            <div class="flex items-center gap-2.5">
+                                <div class="bg-cyan-600 text-white font-mono font-bold text-xs px-2.5 py-1.5 rounded-lg">LANE C</div>
+                                <div>
+                                    <h3 class="font-bold text-slate-900 text-sm sm:text-base flex items-center gap-1.5">
+                                        Dedicated Corporate Office Cab Bay
+                                        <span class="text-[10px] uppercase tracking-wider bg-cyan-600 text-white px-2 py-0.5 rounded-full">Priority</span>
+                                    </h3>
+                                    <p class="text-xs text-slate-600">Main Porch Access • Peak-Hour Employee Pickup/Drop</p>
+                                </div>
+                            </div>
+                            <button onclick="switchRole('cab')" class="text-xs font-semibold text-cyan-700 hover:text-cyan-900 underline flex items-center gap-1 self-start sm:self-auto">
+                                <span>Track Cabs & GPS</span>
+                                <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
+                        <div id="grid-lane-c" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            <!-- Populated dynamically by JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT COLUMN (5 cols): Booking Console / Active Pass & Wayfinding -->
+                <div class="lg:col-span-5 lg:sticky lg:top-24 space-y-5">
+
+                    <!-- STATE 1: BOOKING FORM (Shown when user has no active reservation/parked session) -->
+                    <div id="panel-booking-form" class="bg-white rounded-2xl p-6 shadow-md border border-slate-200">
+                        <div class="flex items-center gap-3 mb-5">
+                            <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                                <i data-lucide="ticket" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-slate-900 text-base">Reserve Parking Slot</h3>
+                                <p class="text-xs text-slate-500">Instant digital pass with QR gate verification</p>
+                            </div>
+                        </div>
+
+                        <form id="booking-form" onsubmit="handleBookingSubmit(event)" class="space-y-4">
+                            <!-- Vehicle Type Toggle -->
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">1. Select Vehicle Type</label>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <button type="button" id="btn-type-car" onclick="selectBookingType('car')" class="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border-2 border-emerald-500 bg-emerald-50 text-emerald-800 font-semibold text-sm transition">
+                                        <i data-lucide="car" class="w-4 h-4"></i>
+                                        <span>Car (Lane A)</span>
+                                    </button>
+                                    <button type="button" id="btn-type-bike" onclick="selectBookingType('bike')" class="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 font-semibold text-sm transition">
+                                        <i data-lucide="bike" class="w-4 h-4"></i>
+                                        <span>Bike (Lane B)</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Slot Selection Dropdown -->
+                            <div>
+                                <label for="booking-slot-select" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">2. Assigned / Preferred Slot</label>
+                                <select id="booking-slot-select" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3.5 py-2.5 text-sm font-mono font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                                    <!-- Populated dynamically -->
+                                </select>
+                                <p class="text-[11px] text-slate-500 mt-1">Tip: You can also click any green <span class="text-emerald-600 font-semibold">Available</span> slot directly on the map.</p>
+                            </div>
+
+                            <!-- Driver / Employee Name -->
+                            <div>
+                                <label for="booking-driver-name" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">3. Employee / Visitor Name</label>
+                                <input type="text" id="booking-driver-name" required placeholder="e.g., Royston Furtado" value="Royston Furtado" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            </div>
+
+                            <!-- Vehicle Registration Number -->
+                            <div>
+                                <label for="booking-vehicle-no" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">4. Vehicle Registration Number</label>
+                                <input type="text" id="booking-vehicle-no" required placeholder="e.g., KA-01-MJ-2026" value="KA-01-MJ-2026" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-mono uppercase text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            </div>
+
+                            <!-- 30-Minute Rule Notice -->
+                            <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-start gap-2.5">
+                                <i data-lucide="clock" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
+                                <p class="text-xs text-amber-800 leading-relaxed">
+                                    <strong>30-Minute Arrival Window:</strong> Once reserved, reach the Entrance Gate within 30 minutes to scan your QR code, or the slot will auto-release.
+                                </p>
+                            </div>
+
+                            <button type="submit" class="w-full py-3 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm shadow-md hover:shadow-lg transition flex items-center justify-center gap-2">
+                                <i data-lucide="qr-code" class="w-4 h-4 text-emerald-400"></i>
+                                <span>Confirm Reservation & Generate QR</span>
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- STATE 2: ACTIVE RESERVATION / PARKED PASS & QR WORKFLOW -->
+                    <div id="panel-active-pass" class="hidden bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
+                        <!-- Top Ticket Header -->
+                        <div id="pass-header-banner" class="bg-amber-500 text-slate-950 px-6 py-4 flex items-center justify-between">
+                            <div>
+                                <span id="pass-status-badge" class="text-[11px] font-extrabold uppercase tracking-wider bg-slate-950/15 px-2.5 py-0.5 rounded-full">
+                                    RESERVED • AWAITING GATE SCAN
+                                </span>
+                                <h3 class="text-xl font-extrabold mt-1 font-mono" id="pass-slot-title">LANE A • SLOT A-01</h3>
+                            </div>
+                            <div class="text-right font-mono">
+                                <span class="text-[11px] uppercase font-bold opacity-80 block">Pass ID</span>
+                                <span class="text-sm font-bold" id="pass-id-display">#VPMS-8492</span>
+                            </div>
+                        </div>
+
+                        <div class="p-6 space-y-5">
+                            <!-- 30-Minute Countdown Box (Visible only in RESERVED state) -->
+                            <div id="timer-box" class="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-xs font-bold text-amber-900 uppercase tracking-wider flex items-center gap-1.5">
+                                        <i data-lucide="timer" class="w-4 h-4 text-amber-600"></i>
+                                        30-Min Arrival Grace Timer
+                                    </span>
+                                    <span id="countdown-display" class="font-mono text-lg font-extrabold text-amber-700">30:00</span>
+                                </div>
+                                <div class="w-full bg-amber-200/70 rounded-full h-2 overflow-hidden mb-2.5">
+                                    <div id="countdown-bar" class="bg-amber-500 h-2 rounded-full transition-all duration-500" style="width: 100%"></div>
+                                </div>
+                                <div class="flex items-center justify-between text-[11px] text-amber-800">
+                                    <span>Auto-cancels at 00:00</span>
+                                    <button type="button" onclick="simulateTimeout()" class="text-rose-700 hover:text-rose-900 font-semibold underline">
+                                        Simulate Timeout (Test)
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- QR Code Display Card -->
+                            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex flex-col sm:flex-row items-center gap-4">
+                                <div class="bg-white p-2.5 rounded-xl border border-slate-200 shadow-sm shrink-0">
+                                    <canvas id="qr-canvas" width="128" height="128" class="block"></canvas>
+                                </div>
+                                <div class="text-center sm:text-left space-y-1.5 flex-1">
+                                    <span id="qr-type-label" class="inline-block text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">
+                                        ENTRY GATE QR CODE
+                                    </span>
+                                    <h4 class="font-bold text-slate-900 text-sm" id="pass-vehicle-info">KA-01-MJ-2026 • Car</h4>
+                                    <p class="text-xs text-slate-500" id="pass-driver-info">Driver: Royston Furtado</p>
+                                    <p class="text-[11px] text-slate-400 font-mono" id="pass-timestamp">Booked: Just now</p>
+                                </div>
+                            </div>
+
+                            <!-- Indoor Wayfinding Guidance (Visible after Entry QR Scan) -->
+                            <div id="wayfinding-box" class="hidden bg-emerald-50 border border-emerald-200 rounded-xl p-4 space-y-2.5">
+                                <div class="flex items-center justify-between">
+                                    <h4 class="text-xs font-extrabold uppercase tracking-wider text-emerald-900 flex items-center gap-1.5">
+                                        <i data-lucide="compass" class="w-4 h-4 text-emerald-600"></i>
+                                        Indoor Slot Navigation Guide
+                                    </h4>
+                                    <span class="text-[11px] font-semibold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded">Gate Verified ✓</span>
+                                </div>
+                                <ol id="wayfinding-steps" class="text-xs text-emerald-900 space-y-1.5 pl-4 list-decimal font-medium">
+                                    <!-- Populated dynamically based on Lane & Slot -->
+                                </ol>
+                            </div>
+
+                            <!-- Action Controls based on Workflow Step -->
+                            <div id="pass-actions" class="space-y-2.5 pt-1">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ===================================================================== -->
+        <!-- VIEW 2: OFFICE CAB COMMUTER & FLEET GPS TRACKING                      -->
+        <!-- ===================================================================== -->
+        <section id="view-cab" class="hidden space-y-6">
+            <!-- Header Banner -->
+            <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-cyan-950 text-white rounded-2xl p-6 shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-cyan-500/20 border border-cyan-400/30 text-cyan-300 text-xs font-semibold mb-2">
+                        <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+                        <span>Corporate Commuter Safety & Fleet Module</span>
+                    </div>
+                    <h2 class="text-xl sm:text-2xl font-bold">Office Cab Assignment & Live GPS Tracking</h2>
+                    <p class="text-sm text-slate-300 mt-1 max-w-2xl">
+                        Automated notifications with exact Lane & Slot numbers inside Lane C so employees locate their assigned cab immediately during peak hours without congestion.
+                    </p>
+                </div>
+                <button onclick="dispatchNewCabNotification()" class="shrink-0 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs sm:text-sm px-4 py-3 rounded-xl shadow-lg transition flex items-center gap-2 self-start md:self-auto">
+                    <i data-lucide="bell-ring" class="w-4 h-4"></i>
+                    <span>Simulate New Cab Assignment</span>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Left 5 Cols: Employee Cab Assignment Notification & Fleet List -->
+                <div class="lg:col-span-5 space-y-5">
+                    <!-- Active Employee Cab Notification Card -->
+                    <div class="bg-white rounded-2xl p-5 shadow-sm border-2 border-cyan-500 relative overflow-hidden">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-cyan-700 bg-cyan-50 px-2.5 py-1 rounded-lg">
+                                <span class="w-2 h-2 rounded-full bg-cyan-500 animate-ping"></span>
+                                Assigned Cab Notification
+                            </span>
+                            <span id="cab-notif-time" class="text-xs text-slate-400 font-mono">Updated just now</span>
+                        </div>
+
+                        <div class="bg-slate-900 text-white rounded-xl p-4 mb-4 flex items-center justify-between">
+                            <div>
+                                <span class="text-[11px] uppercase tracking-wider text-slate-400 block">Pickup Bay Location</span>
+                                <span id="active-cab-bay" class="text-xl font-extrabold font-mono text-cyan-400">LANE C • SLOT C-01</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-[11px] uppercase tracking-wider text-slate-400 block">Cab ID</span>
+                                <span id="active-cab-id" class="text-base font-bold font-mono text-white">CAB-104</span>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3 text-xs mb-4">
+                            <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                <span class="text-slate-400 block mb-0.5">Vehicle Number</span>
+                                <strong id="active-cab-plate" class="text-slate-900 font-mono text-sm">KA-05-AB-7741</strong>
+                            </div>
+                            <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                <span class="text-slate-400 block mb-0.5">Chauffeur / Driver</span>
+                                <strong id="active-cab-driver" class="text-slate-900 text-sm">Ramesh Kumar ★ 4.9</strong>
+                            </div>
+                            <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                <span class="text-slate-400 block mb-0.5">Route Corridor</span>
+                                <strong id="active-cab-route" class="text-slate-900">Electronic City → JAIN Campus</strong>
+                            </div>
+                            <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                <span class="text-slate-400 block mb-0.5">Cab Status</span>
+                                <strong id="active-cab-status" class="text-emerald-600">● Parked at Bay (Ready)</strong>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <button onclick="toggleCabTripSimulation()" id="btn-cab-trip" class="flex-1 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold py-2.5 px-3 rounded-xl transition flex items-center justify-center gap-1.5">
+                                <i data-lucide="play" class="w-3.5 h-3.5 text-cyan-400"></i>
+                                <span>Start Live Route Simulation</span>
+                            </button>
+                            <button onclick="triggerEmergencySOS()" class="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold py-2.5 px-3.5 rounded-xl transition flex items-center gap-1">
+                                <i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i>
+                                <span>Safety SOS</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Corporate Cab Bay Roster (Lane C) -->
+                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+                        <h3 class="font-bold text-slate-900 text-sm mb-3 flex items-center justify-between">
+                            <span>Lane C Fleet Roster (4 Dedicated Bays)</span>
+                            <span class="text-xs font-normal text-slate-500">Click any cab to inspect</span>
+                        </h3>
+                        <div id="cab-roster-list" class="space-y-2.5">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right 7 Cols: Interactive GPS Safety Radar & Route Map -->
+                <div class="lg:col-span-7 bg-white rounded-2xl p-5 shadow-sm border border-slate-200 flex flex-col justify-between">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+                        <div>
+                            <h3 class="font-bold text-slate-900 text-base flex items-center gap-2">
+                                <i data-lucide="radar" class="w-5 h-5 text-cyan-600"></i>
+                                Real-Time GPS Safety Telemetry & Campus Map
+                            </h3>
+                            <p class="text-xs text-slate-500">Live coordinate tracking for employee safety & dispatch optimization</p>
+                        </div>
+                        <div class="flex items-center gap-2 font-mono text-xs bg-slate-100 px-3 py-1.5 rounded-lg">
+                            <span class="text-slate-500">GPS:</span>
+                            <span id="gps-coords" class="font-bold text-slate-800">12.9716° N, 77.5946° E</span>
+                        </div>
+                    </div>
+
+                    <!-- Interactive SVG Map Visualization -->
+                    <div class="relative w-full h-80 sm:h-96 bg-slate-950 rounded-2xl overflow-hidden border border-slate-800 shadow-inner">
+                        <svg viewBox="0 0 600 360" class="w-full h-full">
+                            <!-- Grid Background -->
+                            <defs>
+                                <pattern id="map-grid" width="30" height="30" patternUnits="userSpaceOnUse">
+                                    <path d="M 30 0 L 0 0 0 30" fill="none" stroke="#1e293b" stroke-width="1"/>
+                                </pattern>
+                            </defs>
+                            <rect width="600" height="360" fill="url(#map-grid)" />
+
+                            <!-- Road Network -->
+                            <path d="M 40 300 L 180 300 L 180 180 L 420 180 L 420 80 L 550 80" fill="none" stroke="#334155" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M 40 300 L 180 300 L 180 180 L 420 180 L 420 80 L 550 80" fill="none" stroke="#06b6d4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="route-line"/>
+
+                            <!-- Campus Parking Zone (Lane C Hub) -->
+                            <rect x="25" y="255" width="120" height="75" rx="10" fill="#0f172a" stroke="#06b6d4" stroke-width="2"/>
+                            <text x="85" y="285" fill="#22d3ee" font-size="11" font-family="monospace" font-weight="bold" text-anchor="middle">CORPORATE HUB</text>
+                            <text x="85" y="302" fill="#94a3b8" font-size="9" font-family="sans-serif" text-anchor="middle">Lane C Cab Bay</text>
+
+                            <!-- Checkpoint 1: Main Gate -->
+                            <circle cx="180" cy="180" r="7" fill="#10b981"/>
+                            <text x="195" y="168" fill="#cbd5e1" font-size="10" font-family="sans-serif">North Gate Scanner</text>
+
+                            <!-- Checkpoint 2: Tech Park Junction -->
+                            <circle cx="420" cy="180" r="7" fill="#f59e0b"/>
+                            <text x="435" y="195" fill="#cbd5e1" font-size="10" font-family="sans-serif">Silk Board Junction</text>
+
+                            <!-- Destination: Employee Drop Point -->
+                            <rect x="465" y="45" width="110" height="55" rx="10" fill="#0f172a" stroke="#10b981" stroke-width="2"/>
+                            <text x="520" y="70" fill="#34d399" font-size="10" font-family="monospace" font-weight="bold" text-anchor="middle">DROP SECTOR</text>
+                            <text x="520" y="85" fill="#94a3b8" font-size="9" font-family="sans-serif" text-anchor="middle">Electronic City Ph-1</text>
+
+                            <!-- Moving Cab Marker Group -->
+                            <g id="svg-cab-marker" transform="translate(85, 300)">
+                                <circle cx="0" cy="0" r="18" fill="rgba(6, 182, 212, 0.25)"/>
+                                <circle cx="0" cy="0" r="9" fill="#06b6d4" stroke="#ffffff" stroke-width="2.5"/>
+                                <rect x="-34" y="-32" width="68" height="18" rx="4" fill="#0f172a" stroke="#22d3ee" stroke-width="1"/>
+                                <text id="svg-cab-label" x="0" y="-20" fill="#ffffff" font-size="9" font-family="monospace" font-weight="bold" text-anchor="middle">CAB-104</text>
+                            </g>
+                        </svg>
+
+                        <!-- Overlay Telemetry Bar -->
+                        <div class="absolute bottom-3 left-3 right-3 bg-slate-900/90 backdrop-blur-md border border-slate-700/80 rounded-xl px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 text-xs text-white">
+                            <div class="flex items-center gap-4">
+                                <div>
+                                    <span class="text-slate-400 block text-[10px]">SPEED</span>
+                                    <strong id="telemetry-speed" class="font-mono text-cyan-400">0 km/h</strong>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 block text-[10px]">ETA TO DROP</span>
+                                    <strong id="telemetry-eta" class="font-mono text-emerald-400">Boarding at Bay</strong>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 block text-[10px]">GEO-FENCE</span>
+                                    <strong class="font-mono text-emerald-400">VERIFIED ✓</strong>
+                                </div>
+                            </div>
+                            <span class="text-[11px] text-slate-400">24/7 Command Center Linked</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ===================================================================== -->
+        <!-- VIEW 3: ADMIN ANALYTICS, BACKEND LOGS & FEEDBACK                      -->
+        <!-- ===================================================================== -->
+        <section id="view-admin" class="hidden space-y-6">
+            <!-- Top KPI Cards (Highlighting Abstract & Expected Results Metrics) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Facility Utilization</span>
+                        <div class="p-2 rounded-lg bg-indigo-50 text-indigo-600"><i data-lucide="pie-chart" class="w-4 h-4"></i></div>
+                    </div>
+                    <div class="flex items-baseline gap-2">
+                        <span id="kpi-occupancy" class="text-2xl font-extrabold text-slate-900">55%</span>
+                        <span id="kpi-slots-fraction" class="text-xs font-medium text-slate-500">(11 / 20 slots)</span>
+                    </div>
+                    <p class="text-xs text-emerald-600 font-medium mt-1">Dynamic allocation active</p>
+                </div>
+
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Avg. Search Time Saved</span>
+                        <div class="p-2 rounded-lg bg-emerald-50 text-emerald-600"><i data-lucide="clock-4" class="w-4 h-4"></i></div>
+                    </div>
+                    <div class="flex items-baseline gap-2">
+                        <span class="text-2xl font-extrabold text-slate-900">11.4 mins</span>
+                        <span class="text-xs font-semibold text-emerald-600">-78% vs Manual</span>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-1">Via QR indoor wayfinding</p>
+                </div>
+
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">CO₂ Emissions Prevented</span>
+                        <div class="p-2 rounded-lg bg-teal-50 text-teal-600"><i data-lucide="leaf" class="w-4 h-4"></i></div>
+                    </div>
+                    <div class="flex items-baseline gap-2">
+                        <span id="kpi-co2" class="text-2xl font-extrabold text-slate-900">42.8 kg</span>
+                        <span class="text-xs font-medium text-slate-500">Today</span>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-1">Reduced idling & congestion</p>
+                </div>
+
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">QR Gate Scans Logged</span>
+                        <div class="p-2 rounded-lg bg-amber-50 text-amber-600"><i data-lucide="scan-line" class="w-4 h-4"></i></div>
+                    </div>
+                    <div class="flex items-baseline gap-2">
+                        <span id="kpi-scans" class="text-2xl font-extrabold text-slate-900">18</span>
+                        <span class="text-xs font-medium text-slate-500">Backend Synced</span>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-1">100% automated audit trail</p>
+                </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Zone Breakdown Chart -->
+                <div class="lg:col-span-5 bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+                    <h3 class="font-bold text-slate-900 text-sm mb-1">Live Occupancy by Parking Zone</h3>
+                    <p class="text-xs text-slate-500 mb-4">Real-time split across Lane A (Cars), Lane B (Bikes), and Lane C (Cabs)</p>
+                    <div class="h-60 relative">
+                        <canvas id="zoneChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Hourly Peak Utilization Trend -->
+                <div class="lg:col-span-7 bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+                    <h3 class="font-bold text-slate-900 text-sm mb-1">Corporate Peak-Hour Utilization & Cab Dispatch Trend</h3>
+                    <p class="text-xs text-slate-500 mb-4">Analytical insights supporting operational decision-making</p>
+                    <div class="h-60 relative">
+                        <canvas id="peakChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Backend QR Transaction Logs & User Feedback Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Backend Gate Scanner Audit Log (7 Cols) -->
+                <div class="lg:col-span-7 bg-white rounded-2xl p-5 shadow-sm border border-slate-200 flex flex-col">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="font-bold text-slate-900 text-base flex items-center gap-2">
+                                <i data-lucide="database" class="w-4 h-4 text-slate-700"></i>
+                                Backend QR Verification & Gate Logs
+                            </h3>
+                            <p class="text-xs text-slate-500">Automatically recorded whenever Entry or Exit QR codes are scanned</p>
+                        </div>
+                        <span class="text-[11px] font-mono bg-slate-100 text-slate-600 px-2.5 py-1 rounded-md">LIVE DB</span>
+                    </div>
+
+                    <div class="overflow-x-auto flex-1">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                                    <th class="py-2.5 px-3">Time</th>
+                                    <th class="py-2.5 px-3">Event</th>
+                                    <th class="py-2.5 px-3">Vehicle / Driver</th>
+                                    <th class="py-2.5 px-3">Slot</th>
+                                </tr>
+                            </thead>
+                            <tbody id="backend-logs-tbody" class="divide-y divide-slate-100 text-xs">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- User Feedback Mechanism (5 Cols - from Expected Results) -->
+                <div class="lg:col-span-5 bg-white rounded-2xl p-5 shadow-sm border border-slate-200 flex flex-col justify-between space-y-4">
+                    <div>
+                        <h3 class="font-bold text-slate-900 text-base flex items-center gap-2">
+                            <i data-lucide="message-square-plus" class="w-4 h-4 text-emerald-600"></i>
+                            User Feedback & Continuous Improvement
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Collect commuter & driver suggestions to refine system usability</p>
+
+                        <!-- Feedback List -->
+                        <div id="feedback-list" class="mt-4 space-y-2.5 max-h-48 overflow-y-auto pr-1">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Submit New Feedback Form -->
+                    <form onsubmit="handleFeedbackSubmit(event)" class="pt-3 border-t border-slate-100 space-y-2.5">
+                        <div class="flex gap-2">
+                            <input type="text" id="fb-name" required placeholder="Your Name" class="w-1/2 rounded-lg border border-slate-300 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            <select id="fb-rating" class="w-1/2 rounded-lg border border-slate-300 px-3 py-2 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                <option value="5">★★★★★ (5/5 Excellent)</option>
+                                <option value="4">★★★★☆ (4/5 Good)</option>
+                                <option value="3">★★★☆☆ (3/5 Average)</option>
+                            </select>
+                        </div>
+                        <div class="flex gap-2">
+                            <input type="text" id="fb-comment" required placeholder="Share parking or office cab experience..." class="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs px-4 py-2 rounded-lg transition shrink-0">
+                                Submit
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Academic Project Footer -->
+    <footer class="bg-white border-t border-slate-200 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+            <div class="text-center sm:text-left">
+                <strong class="text-slate-800">Vehicle Parking Management System (VPMS)</strong> • Department of Sciences (BCA), JAIN (Deemed-to-be-University), Bengaluru
+            </div>
+            <div class="flex items-center gap-4">
+                <span>Team: Royston J. Furtado, Bhanuprakasha, Dhanraj</span>
+                <button onclick="openCreditsModal()" class="text-emerald-600 hover:text-emerald-800 font-semibold underline">View Credits</button>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Project Credits & Synopsis Modal -->
+    <div id="credits-modal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+            <div class="flex items-start justify-between">
+                <div>
+                    <span class="text-[11px] font-bold uppercase tracking-wider text-cyan-700 bg-cyan-50 px-2.5 py-0.5 rounded-full">Academic Project Synopsis</span>
+                    <h3 class="text-lg font-extrabold text-slate-900 mt-1">Vehicle Parking Management System</h3>
+                    <p class="text-xs text-slate-500">Centre for Distance and Online Education • JAIN (Deemed-to-be-University), Bengaluru</p>
+                </div>
+                <button onclick="closeCreditsModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div class="bg-slate-50 rounded-xl p-4 border border-slate-200 space-y-3 text-xs">
+                <div>
+                    <span class="text-slate-400 uppercase font-bold text-[10px] tracking-wider block mb-1">Project Authors (2nd Sem BCA)</span>
+                    <ul class="space-y-1 text-slate-800 font-medium">
+                        <li class="flex justify-between"><span>1. Royston Jessal Furtado</span> <span class="font-mono text-slate-500">23BCAD0065</span></li>
+                        <li class="flex justify-between"><span>2. Bhanuprakasha</span> <span class="font-mono text-slate-500">23BCAD0014</span></li>
+                        <li class="flex justify-between"><span>3. Dhanraj</span> <span class="font-mono text-slate-500">23BCAD0021</span></li>
+                    </ul>
+                </div>
+                <div class="pt-2 border-t border-slate-200">
+                    <span class="text-slate-400 uppercase font-bold text-[10px] tracking-wider block mb-0.5">Under the Guidance Of</span>
+                    <p class="text-slate-900 font-bold">Prof. Saurav Digambar Jadhav</p>
+                    <p class="text-slate-500">Assistant Professor, Department of Sciences</p>
+                </div>
+            </div>
+
+            <p class="text-xs text-slate-600 leading-relaxed">
+                This interactive prototype implements all core workflows from the synopsis: real-time lane/slot allocation, 30-minute reservation grace timer, Entry & Exit QR generation/scanning, indoor slot wayfinding, corporate office cab bay allocation with live GPS safety tracking, and backend utilization analytics.
+            </p>
+
+            <div class="flex justify-end">
+                <button onclick="closeCreditsModal()" class="bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold px-4 py-2 rounded-xl transition">
+                    Close Window
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // =========================================================================
+        // 1. APPLICATION STATE & MOCK DATA
+        // =========================================================================
+        const parkingSlots = [
+            // Lane A: Cars (8 slots)
+            { id: 'A-01', lane: 'A', type: 'car', status: 'available', vehicleNo: null, driver: null },
+            { id: 'A-02', lane: 'A', type: 'car', status: 'occupied', vehicleNo: 'KA-03-MN-4412', driver: 'Ananya Sharma' },
+            { id: 'A-03', lane: 'A', type: 'car', status: 'available', vehicleNo: null, driver: null },
+            { id: 'A-04', lane: 'A', type: 'car', status: 'occupied', vehicleNo: 'KA-51-HQ-9081', driver: 'Vikram Rao' },
+            { id: 'A-05', lane: 'A', type: 'car', status: 'available', vehicleNo: null, driver: null },
+            { id: 'A-06', lane: 'A', type: 'car', status: 'available', vehicleNo: null, driver: null },
+            { id: 'A-07', lane: 'A', type: 'car', status: 'occupied', vehicleNo: 'KA-04-ZZ-1120', driver: 'Meera Nair' },
+            { id: 'A-08', lane: 'A', type: 'car', status: 'available', vehicleNo: null, driver: null },
+
+            // Lane B: Two-Wheelers / Bikes (8 slots)
+            { id: 'B-01', lane: 'B', type: 'bike', status: 'available', vehicleNo: null, driver: null },
+            { id: 'B-02', lane: 'B', type: 'bike', status: 'occupied', vehicleNo: 'KA-01-EP-3390', driver: 'Karthik Gowda' },
+            { id: 'B-03', lane: 'B', type: 'bike', status: 'available', vehicleNo: null, driver: null },
+            { id: 'B-04', lane: 'B', type: 'bike', status: 'available', vehicleNo: null, driver: null },
+            { id: 'B-05', lane: 'B', type: 'bike', status: 'occupied', vehicleNo: 'KA-05-KL-8821', driver: 'Sneha Kulkarni' },
+            { id: 'B-06', lane: 'B', type: 'bike', status: 'available', vehicleNo: null, driver: null },
+            { id: 'B-07', lane: 'B', type: 'bike', status: 'occupied', vehicleNo: 'KA-02-RT-5109', driver: 'Arjun Menon' },
+            { id: 'B-08', lane: 'B', type: 'bike', status: 'available', vehicleNo: null, driver: null },
+
+            // Lane C: Dedicated Corporate Office Cabs (4 slots)
+            { id: 'C-01', lane: 'C', type: 'cab', status: 'cab', vehicleNo: 'KA-05-AB-7741', driver: 'Ramesh Kumar', cabId: 'CAB-104', route: 'Electronic City → JAIN Campus' },
+            { id: 'C-02', lane: 'C', type: 'cab', status: 'cab', vehicleNo: 'KA-01-CD-3920', driver: 'Suresh Babu', cabId: 'CAB-108', route: 'Whitefield → JAIN Campus' },
+            { id: 'C-03', lane: 'C', type: 'cab', status: 'cab', vehicleNo: 'KA-53-EF-6104', driver: 'Mahesh Naik', cabId: 'CAB-112', route: 'Indiranagar → JAIN Campus' },
+            { id: 'C-04', lane: 'C', type: 'cab', status: 'available', vehicleNo: null, driver: 'Standby Bay', cabId: 'OPEN-BAY', route: 'Awaiting Incoming Fleet' }
+        ];
+
+        // User's active session state
+        let activeSession = null; 
+        // Structure when active:
+        // { passId, slotId, lane, type, vehicleNo, driver, status: 'reserved' | 'parked' | 'exit_ready', remainingSeconds: 1800, bookedAt }
+
+        let timerInterval = null;
+        let selectedVehicleType = 'car';
+
+        // Office Cab Telemetry State
+        let activeCabIndex = 0;
+        let cabTripRunning = false;
+        let cabTripProgress = 0;
+        let cabTripInterval = null;
+
+        // Backend Logs Array
+        const backendLogs = [
+            { time: '16:12:04', event: 'ENTRY_QR_SCAN', vehicle: 'KA-03-MN-4412 (Car)', slot: 'A-02' },
+            { time: '16:05:49', event: 'CAB_BAY_SYNC', vehicle: 'KA-05-AB-7741 (CAB-104)', slot: 'C-01' },
+            { time: '15:54:18', event: 'EXIT_QR_SCAN', vehicle: 'KA-01-JK-9921 (Car)', slot: 'A-05' },
+            { time: '15:41:02', event: 'ENTRY_QR_SCAN', vehicle: 'KA-01-EP-3390 (Bike)', slot: 'B-02' },
+        ];
+
+        // User Feedbacks Array
+        const userFeedbacks = [
+            { name: 'Priya Nair (HR)', rating: 5, comment: 'Office cab notification with exact Lane C slot number saved 10 mins during evening rush!' },
+            { name: 'Aditya Verma', rating: 5, comment: 'Indoor wayfinding right after scanning the entry QR code makes finding empty slots effortless.' },
+        ];
+
+        let zoneChartInstance = null;
+        let peakChartInstance = null;
+
+        // =========================================================================
+        // 2. INITIALIZATION & NAVIGATION
+        // =========================================================================
+        window.onload = function () {
+            lucide.createIcons();
+            renderParkingGrids();
+            populateSlotDropdown();
+            renderCabRoster();
+            renderBackendLogs();
+            renderFeedbackList();
+            initCharts();
+            updateAnalyticsKPIs();
+        };
+
+        function switchRole(role) {
+            // Hide all views
+            ['owner', 'cab', 'admin'].forEach(r => {
+                document.getElementById(`view-${r}`).classList.add('hidden');
+                const btn = document.getElementById(`nav-${r}`);
+                btn.classList.remove('bg-emerald-500', 'text-slate-950', 'shadow');
+                btn.classList.add('text-slate-300', 'hover:text-white');
+            });
+
+            // Show selected view
+            document.getElementById(`view-${role}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`nav-${role}`);
+            activeBtn.classList.remove('text-slate-300', 'hover:text-white');
+            activeBtn.classList.add('bg-emerald-500', 'text-slate-950', 'shadow');
+
+            if (role === 'admin') {
+                updateCharts();
+            }
+            lucide.createIcons();
+        }
+
+        function showToast(title, message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const colors = {
+                success: 'bg-slate-900 border-emerald-500 text-white',
+                warning: 'bg-slate-900 border-amber-500 text-white',
+                danger: 'bg-slate-900 border-rose-500 text-white',
+                info: 'bg-slate-900 border-cyan-500 text-white'
+            };
+            const icons = {
+                success: 'check-circle-2',
+                warning: 'alert-circle',
+                danger: 'x-circle',
+                info: 'bell'
+            };
+            const iconColors = {
+                success: 'text-emerald-400',
+                warning: 'text-amber-400',
+                danger: 'text-rose-400',
+                info: 'text-cyan-400'
+            };
+
+            const toast = document.createElement('div');
+            toast.className = `pointer-events-auto border-l-4 ${colors[type]} rounded-xl p-3.5 shadow-xl flex items-start gap-3 transform transition-all duration-300 translate-x-0`;
+            toast.innerHTML = `
+                <i data-lucide="${icons[type]}" class="w-5 h-5 ${iconColors[type]} shrink-0 mt-0.5"></i>
+                <div class="flex-1 text-xs">
+                    <p class="font-bold text-sm">${title}</p>
+                    <p class="text-slate-300 mt-0.5 leading-relaxed">${message}</p>
+                </div>
+            `;
+            container.appendChild(toast);
+            lucide.createIcons();
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(20px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 4200);
+        }
+
+        // =========================================================================
+        // 3. PARKING LOT GRID & SLOT BOOKING LOGIC
+        // =========================================================================
+        function renderParkingGrids() {
+            const laneA = document.getElementById('grid-lane-a');
+            const laneB = document.getElementById('grid-lane-b');
+            const laneC = document.getElementById('grid-lane-c');
+
+            laneA.innerHTML = '';
+            laneB.innerHTML = '';
+            laneC.innerHTML = '';
+
+            let avail = 0, reserved = 0, occupied = 0, cabs = 0;
+            let aFree = 0, bFree = 0;
+
+            parkingSlots.forEach(slot => {
+                if (slot.status === 'available') {
+                    avail++;
+                    if (slot.lane === 'A') aFree++;
+                    if (slot.lane === 'B') bFree++;
+                } else if (slot.status === 'reserved') {
+                    reserved++;
+                } else if (slot.status === 'occupied') {
+                    occupied++;
+                } else if (slot.status === 'cab') {
+                    cabs++;
+                }
+
+                const card = createSlotCard(slot);
+                if (slot.lane === 'A') laneA.appendChild(card);
+                else if (slot.lane === 'B') laneB.appendChild(card);
+                else laneC.appendChild(card);
+            });
+
+            document.getElementById('count-available').textContent = avail;
+            document.getElementById('count-reserved').textContent = reserved;
+            document.getElementById('count-occupied').textContent = occupied;
+            document.getElementById('count-cabs').textContent = cabs;
+
+            document.getElementById('lane-a-stats').textContent = `${aFree}/8 Free`;
+            document.getElementById('lane-b-stats').textContent = `${bFree}/8 Free`;
+
+            updateAnalyticsKPIs();
+            lucide.createIcons();
+        }
+
+        function createSlotCard(slot) {
+            const div = document.createElement('div');
+            const isUserSlot = activeSession && activeSession.slotId === slot.id;
+
+            let styleClasses = '';
+            let badgeText = '';
+            let iconName = slot.type === 'bike' ? 'bike' : 'car';
+
+            if (slot.status === 'available') {
+                styleClasses = 'bg-emerald-50/70 hover:bg-emerald-100/80 border-emerald-300 text-emerald-950 cursor-pointer hover:shadow-md';
+                badgeText = 'AVAILABLE';
+            } else if (slot.status === 'reserved') {
+                styleClasses = 'bg-amber-50 border-amber-400 text-amber-950 ring-2 ring-amber-400/50';
+                badgeText = isUserSlot ? 'YOUR HOLD' : 'RESERVED';
+            } else if (slot.status === 'occupied') {
+                styleClasses = isUserSlot
+                    ? 'bg-rose-100 border-rose-500 text-rose-950 ring-2 ring-rose-500/50'
+                    : 'bg-slate-100 border-slate-300 text-slate-600 opacity-85';
+                badgeText = isUserSlot ? 'YOUR CAR' : 'OCCUPIED';
+            } else if (slot.status === 'cab') {
+                styleClasses = 'bg-cyan-100/80 border-cyan-400 text-cyan-950 cursor-pointer hover:bg-cyan-200/70';
+                badgeText = slot.cabId || 'CAB BAY';
+                iconName = 'bus-front';
+            }
+
+            div.className = `rounded-xl border p-3 transition-all flex flex-col justify-between min-h-[92px] ${styleClasses}`;
+
+            div.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <span class="font-mono font-extrabold text-xs tracking-tight">${slot.id}</span>
+                    <i data-lucide="${iconName}" class="w-4 h-4 opacity-75"></i>
+                </div>
+                <div class="my-1.5">
+                    <span class="inline-block text-[10px] font-bold px-1.5 py-0.5 rounded bg-white/80 border border-black/5">
+                        ${badgeText}
+                    </span>
+                </div>
+                <div class="text-[10px] font-mono truncate opacity-80">
+                    ${slot.vehicleNo ? slot.vehicleNo : (slot.lane === 'C' ? 'Ready for Cab' : 'Tap to Book')}
+                </div>
+            `;
+
+            div.onclick = () => {
+                if (slot.lane === 'C') {
+                    switchRole('cab');
+                    return;
+                }
+                if (slot.status === 'available') {
+                    if (activeSession) {
+                        showToast('Active Pass Exists', `You already have an active pass for Slot ${activeSession.slotId}. Complete or cancel it first.`, 'warning');
+                        return;
+                    }
+                    selectBookingType(slot.type);
+                    document.getElementById('booking-slot-select').value = slot.id;
+                    showToast('Slot Selected', `Slot ${slot.id} selected in booking form.`, 'info');
+                } else {
+                    showToast(`Slot ${slot.id} (${slot.status.toUpperCase()})`, slot.vehicleNo ? `Assigned to ${slot.vehicleNo} (${slot.driver})` : 'Currently unavailable.', 'info');
+                }
+            };
+
+            return div;
+        }
+
+        function selectBookingType(type) {
+            selectedVehicleType = type;
+            const carBtn = document.getElementById('btn-type-car');
+            const bikeBtn = document.getElementById('btn-type-bike');
+
+            if (type === 'car') {
+                carBtn.className = 'flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border-2 border-emerald-500 bg-emerald-50 text-emerald-800 font-semibold text-sm transition';
+                bikeBtn.className = 'flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 font-semibold text-sm transition';
+            } else {
+                bikeBtn.className = 'flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border-2 border-emerald-500 bg-emerald-50 text-emerald-800 font-semibold text-sm transition';
+                carBtn.className = 'flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 font-semibold text-sm transition';
+            }
+            populateSlotDropdown();
+        }
+
+        function populateSlotDropdown() {
+            const select = document.getElementById('booking-slot-select');
+            const availableSlots = parkingSlots.filter(s => s.type === selectedVehicleType && s.status === 'available');
+            select.innerHTML = '';
+
+            if (availableSlots.length === 0) {
+                const opt = document.createElement('option');
+                opt.value = '';
+                opt.textContent = `No ${selectedVehicleType} slots available right now`;
+                select.appendChild(opt);
+                return;
+            }
+
+            availableSlots.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.id;
+                opt.textContent = `Lane ${s.lane} • Slot ${s.id} (Available)`;
+                select.appendChild(opt);
+            });
+        }
+
+        // =========================================================================
+        // 4. RESERVATION, 30-MIN TIMER, QR SCANNER & EXIT WORKFLOW
+        // =========================================================================
+        function handleBookingSubmit(e) {
+            e.preventDefault();
+            const slotId = document.getElementById('booking-slot-select').value;
+            const driver = document.getElementById('booking-driver-name').value.trim();
+            const vehicleNo = document.getElementById('booking-vehicle-no').value.trim().toUpperCase();
+
+            if (!slotId) {
+                showToast('No Slot Available', 'Please choose another vehicle category or wait for a slot to open.', 'danger');
+                return;
+            }
+
+            const slot = parkingSlots.find(s => s.id === slotId);
+            slot.status = 'reserved';
+            slot.vehicleNo = vehicleNo;
+            slot.driver = driver;
+
+            const now = new Date();
+            const timeStr = now.toTimeString().slice(0, 8);
+
+            activeSession = {
+                passId: 'VPMS-' + Math.floor(1000 + Math.random() * 9000),
+                slotId: slot.id,
+                lane: slot.lane,
+                type: slot.type,
+                vehicleNo,
+                driver,
+                status: 'reserved',
+                remainingSeconds: 30 * 60, // 30 minutes window
+                bookedAt: timeStr
+            };
+
+            addBackendLog('SLOT_RESERVED', `${vehicleNo} (${slot.type})`, slot.id);
+            renderParkingGrids();
+            renderActivePassPanel();
+            startGraceTimer();
+
+            showToast('Slot Reserved!', `Slot ${slot.id} held for 30 mins. Entry QR Code generated.`, 'success');
+        }
+
+        function startGraceTimer() {
+            clearInterval(timerInterval);
+            updateTimerUI();
+
+            timerInterval = setInterval(() => {
+                if (!activeSession || activeSession.status !== 'reserved') {
+                    clearInterval(timerInterval);
+                    return;
+                }
+                activeSession.remainingSeconds--;
+                updateTimerUI();
+
+                if (activeSession.remainingSeconds <= 0) {
+                    clearInterval(timerInterval);
+                    handleReservationExpired();
+                }
+            }, 1000);
+        }
+
+        function updateTimerUI() {
+            if (!activeSession) return;
+            const mins = Math.floor(activeSession.remainingSeconds / 60);
+            const secs = activeSession.remainingSeconds % 60;
+            const formatted = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+            document.getElementById('countdown-display').textContent = formatted;
+
+            const pct = Math.max(0, (activeSession.remainingSeconds / (30 * 60)) * 100);
+            document.getElementById('countdown-bar').style.width = `${pct}%`;
+        }
+
+        function simulateTimeout() {
+            if (!activeSession || activeSession.status !== 'reserved') return;
+            activeSession.remainingSeconds = 0;
+            clearInterval(timerInterval);
+            handleReservationExpired();
+        }
+
+        function handleReservationExpired() {
+            const slot = parkingSlots.find(s => s.id === activeSession.slotId);
+            if (slot) {
+                slot.status = 'available';
+                slot.vehicleNo = null;
+                slot.driver = null;
+            }
+            addBackendLog('AUTO_CANCEL_30M', `${activeSession.vehicleNo} (Timeout)`, activeSession.slotId);
+            showToast('Reservation Auto-Cancelled', `30-minute arrival window expired. Slot ${activeSession.slotId} is now available again.`, 'danger');
+
+            activeSession = null;
+            renderParkingGrids();
+            populateSlotDropdown();
+            renderActivePassPanel();
+        }
+
+        function renderActivePassPanel() {
+            const formPanel = document.getElementById('panel-booking-form');
+            const passPanel = document.getElementById('panel-active-pass');
+
+            if (!activeSession) {
+                formPanel.classList.remove('hidden');
+                passPanel.classList.add('hidden');
+                return;
+            }
+
+            formPanel.classList.add('hidden');
+            passPanel.classList.remove('hidden');
+
+            const banner = document.getElementById('pass-header-banner');
+            const badge = document.getElementById('pass-status-badge');
+            const timerBox = document.getElementById('timer-box');
+            const qrLabel = document.getElementById('qr-type-label');
+            const wayfindingBox = document.getElementById('wayfinding-box');
+            const actionsDiv = document.getElementById('pass-actions');
+
+            document.getElementById('pass-slot-title').textContent = `LANE ${activeSession.lane} • SLOT ${activeSession.slotId}`;
+            document.getElementById('pass-id-display').textContent = `#${activeSession.passId}`;
+            document.getElementById('pass-vehicle-info').textContent = `${activeSession.vehicleNo} • ${activeSession.type.toUpperCase()}`;
+            document.getElementById('pass-driver-info').textContent = `Driver: ${activeSession.driver}`;
+            document.getElementById('pass-timestamp').textContent = `Booked at ${activeSession.bookedAt}`;
+
+            if (activeSession.status === 'reserved') {
+                banner.className = 'bg-amber-500 text-slate-950 px-6 py-4 flex items-center justify-between';
+                badge.textContent = 'RESERVED • AWAITING ENTRANCE SCAN';
+                timerBox.classList.remove('hidden');
+                wayfindingBox.classList.add('hidden');
+                qrLabel.className = 'inline-block text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-amber-100 text-amber-900';
+                qrLabel.textContent = 'ENTRY GATE QR CODE';
+
+                drawStylizedQR(`ENTRY|${activeSession.passId}|${activeSession.slotId}|${activeSession.vehicleNo}`, '#0f172a');
+
+                actionsDiv.innerHTML = `
+                    <button onclick="simulateEntryQRScan()" class="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md transition flex items-center justify-center gap-2">
+                        <i data-lucide="scan-line" class="w-4 h-4"></i>
+                        <span>Simulate Entrance Gate QR Scan</span>
+                    </button>
+                    <button onclick="cancelUserReservation()" class="w-full py-2 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition">
+                        Cancel Reservation
+                    </button>
+                `;
+            } else if (activeSession.status === 'parked') {
+                banner.className = 'bg-emerald-600 text-white px-6 py-4 flex items-center justify-between';
+                badge.textContent = 'VERIFIED & PARKED • ACTIVE SESSION';
+                timerBox.classList.add('hidden');
+                wayfindingBox.classList.remove('hidden');
+                qrLabel.className = 'inline-block text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-100 text-emerald-900';
+                qrLabel.textContent = 'ACTIVE PARKING PASS';
+
+                populateWayfinding(activeSession.lane, activeSession.slotId);
+                drawStylizedQR(`PARKED|${activeSession.passId}|${activeSession.slotId}`, '#047857');
+
+                actionsDiv.innerHTML = `
+                    <button onclick="requestExitQR()" class="w-full py-3 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm shadow-md transition flex items-center justify-center gap-2">
+                        <i data-lucide="log-out" class="w-4 h-4 text-cyan-400"></i>
+                        <span>Request Exit & Generate Exit QR</span>
+                    </button>
+                `;
+            } else if (activeSession.status === 'exit_ready') {
+                banner.className = 'bg-indigo-600 text-white px-6 py-4 flex items-center justify-between';
+                badge.textContent = 'EXIT QR GENERATED • READY TO LEAVE';
+                timerBox.classList.add('hidden');
+                wayfindingBox.classList.add('hidden');
+                qrLabel.className = 'inline-block text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-indigo-100 text-indigo-900';
+                qrLabel.textContent = 'EXIT GATE QR CODE';
+
+                drawStylizedQR(`EXIT|${activeSession.passId}|${activeSession.slotId}|CLEAR`, '#3730a3');
+
+                actionsDiv.innerHTML = `
+                    <button onclick="simulateExitQRScan()" class="w-full py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-md transition flex items-center justify-center gap-2">
+                        <i data-lucide="qr-code" class="w-4 h-4"></i>
+                        <span>Simulate Exit Gate QR Scan & Free Slot</span>
+                    </button>
+                `;
+            }
+
+            lucide.createIcons();
+        }
+
+        function simulateEntryQRScan() {
+            if (!activeSession || activeSession.status !== 'reserved') return;
+            clearInterval(timerInterval);
+
+            activeSession.status = 'parked';
+            const slot = parkingSlots.find(s => s.id === activeSession.slotId);
+            if (slot) slot.status = 'occupied';
+
+            addBackendLog('ENTRY_QR_SCAN', `${activeSession.vehicleNo} (${activeSession.type})`, activeSession.slotId);
+            renderParkingGrids();
+            renderActivePassPanel();
+
+            showToast('Entry QR Verified!', `Boom barrier opened. Follow navigation to Lane ${activeSession.lane}, Slot ${activeSession.slotId}.`, 'success');
+        }
+
+        function populateWayfinding(lane, slotId) {
+            const steps = document.getElementById('wayfinding-steps');
+            if (lane === 'A') {
+                steps.innerHTML = `
+                    <li>Proceed straight 30m past the <strong>North Gate Optical Scanner</strong>.</li>
+                    <li>Turn <strong>Left</strong> at the digital signboard marked <span class="font-mono bg-white px-1.5 rounded border border-emerald-200">LANE A (CARS)</span>.</li>
+                    <li>Drive down the East Wing aisle to <strong>Slot ${slotId}</strong> (overhead green indicator turns red upon parking).</li>
+                `;
+            } else {
+                steps.innerHTML = `
+                    <li>Keep to the dedicated two-wheeler track immediately right of the <strong>North Gate</strong>.</li>
+                    <li>Enter the covered shelter marked <span class="font-mono bg-white px-1.5 rounded border border-emerald-200">LANE B (BIKES)</span>.</li>
+                    <li>Park at <strong>Slot ${slotId}</strong> and lock your vehicle.</li>
+                `;
+            }
+        }
+
+        function requestExitQR() {
+            if (!activeSession || activeSession.status !== 'parked') return;
+            activeSession.status = 'exit_ready';
+            renderActivePassPanel();
+            showToast('Exit QR Generated', 'Scan this separate Exit QR Code at the exit gate to open the barrier.', 'info');
+        }
+
+        function simulateExitQRScan() {
+            if (!activeSession || activeSession.status !== 'exit_ready') return;
+
+            const slot = parkingSlots.find(s => s.id === activeSession.slotId);
+            if (slot) {
+                slot.status = 'available';
+                slot.vehicleNo = null;
+                slot.driver = null;
+            }
+
+            addBackendLog('EXIT_QR_SCAN', `${activeSession.vehicleNo} (${activeSession.type})`, activeSession.slotId);
+            showToast('Exit Completed!', `Thank you, ${activeSession.driver}. Slot ${activeSession.slotId} is now marked empty.`, 'success');
+
+            activeSession = null;
+            renderParkingGrids();
+            populateSlotDropdown();
+            renderActivePassPanel();
+        }
+
+        function cancelUserReservation() {
+            if (!activeSession) return;
+            clearInterval(timerInterval);
+            const slot = parkingSlots.find(s => s.id === activeSession.slotId);
+            if (slot) {
+                slot.status = 'available';
+                slot.vehicleNo = null;
+                slot.driver = null;
+            }
+            addBackendLog('USER_CANCELLED', `${activeSession.vehicleNo}`, activeSession.slotId);
+            activeSession = null;
+            renderParkingGrids();
+            populateSlotDropdown();
+            renderActivePassPanel();
+            showToast('Reservation Cancelled', 'Slot released back to the available pool.', 'info');
+        }
+
+        // Deterministic visual QR generator on HTML5 Canvas
+        function drawStylizedQR(seedText, darkColor = '#0f172a') {
+            const canvas = document.getElementById('qr-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const size = 128;
+            const cells = 16;
+            const cellSize = size / cells;
+
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, size, size);
+
+            // Simple hash from seedText
+            let hash = 0;
+            for (let i = 0; i < seedText.length; i++) {
+                hash = ((hash << 5) - hash) + seedText.charCodeAt(i);
+                hash |= 0;
+            }
+
+            ctx.fillStyle = darkColor;
+
+            // Draw data modules
+            for (let r = 0; r < cells; r++) {
+                for (let c = 0; c < cells; c++) {
+                    // Skip finder pattern corners
+                    if ((r < 4 && c < 4) || (r < 4 && c >= cells - 4) || (r >= cells - 4 && c < 4)) continue;
+                    const val = Math.abs(Math.sin(hash + r * 19 + c * 37));
+                    if (val > 0.48) {
+                        ctx.fillRect(c * cellSize + 1, r * cellSize + 1, cellSize - 1.5, cellSize - 1.5);
+                    }
+                }
+            }
+
+            // Draw 3 Finder Squares
+            const drawFinder = (x, y) => {
+                ctx.fillStyle = darkColor;
+                ctx.fillRect(x, y, cellSize * 3.5, cellSize * 3.5);
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(x + cellSize * 0.6, y + cellSize * 0.6, cellSize * 2.3, cellSize * 2.3);
+                ctx.fillStyle = darkColor;
+                ctx.fillRect(x + cellSize * 1.15, y + cellSize * 1.15, cellSize * 1.2, cellSize * 1.2);
+            };
+
+            drawFinder(2, 2);
+            drawFinder(size - cellSize * 3.5 - 2, 2);
+            drawFinder(2, size - cellSize * 3.5 - 2);
+        }
+
+        // =========================================================================
+        // 5. OFFICE CAB FLEET & LIVE GPS TRACKING SIMULATION
+        // =========================================================================
+        function renderCabRoster() {
+            const list = document.getElementById('cab-roster-list');
+            const cabSlots = parkingSlots.filter(s => s.lane === 'C');
+            list.innerHTML = '';
+
+            cabSlots.forEach((cab, idx) => {
+                const isSelected = idx === activeCabIndex;
+                const item = document.createElement('div');
+                item.className = `p-3 rounded-xl border transition cursor-pointer flex items-center justify-between ${
+                    isSelected ? 'bg-cyan-50 border-cyan-500 shadow-sm' : 'bg-slate-50 border-slate-200 hover:bg-slate-100'
+                }`;
+
+                item.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="font-mono font-bold text-xs px-2 py-1 rounded bg-slate-900 text-cyan-400">
+                            ${cab.id}
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-slate-900">${cab.cabId} • ${cab.vehicleNo || 'Standby Slot'}</p>
+                            <p class="text-[11px] text-slate-500">${cab.route}</p>
+                        </div>
+                    </div>
+                    <span class="text-[11px] font-semibold ${cab.status === 'cab' ? 'text-emerald-600' : 'text-slate-400'}">
+                        ${cab.status === 'cab' ? '● Ready' : 'Empty'}
+                    </span>
+                `;
+
+                item.onclick = () => {
+                    if (cab.status !== 'cab') {
+                        showToast('Bay C-04 Empty', 'No cab currently parked in C-04. Click "Simulate New Cab Assignment" to dispatch one.', 'info');
+                        return;
+                    }
+                    activeCabIndex = idx;
+                    selectActiveCab(cab);
+                    renderCabRoster();
+                };
+
+                list.appendChild(item);
+            });
+        }
+
+        function selectActiveCab(cab) {
+            document.getElementById('active-cab-bay').textContent = `LANE C • SLOT ${cab.id}`;
+            document.getElementById('active-cab-id').textContent = cab.cabId;
+            document.getElementById('active-cab-plate').textContent = cab.vehicleNo;
+            document.getElementById('active-cab-driver').textContent = `${cab.driver} ★ 4.9`;
+            document.getElementById('active-cab-route').textContent = cab.route;
+            document.getElementById('svg-cab-label').textContent = cab.cabId;
+        }
+
+        function dispatchNewCabNotification() {
+            const c04 = parkingSlots.find(s => s.id === 'C-04');
+            c04.status = 'cab';
+            c04.cabId = 'CAB-119';
+            c04.vehicleNo = 'KA-01-GH-9204';
+            c04.driver = 'Prakash Hegde';
+            c04.route = 'Koramangala → JAIN Campus';
+
+            activeCabIndex = 3;
+            selectActiveCab(c04);
+            renderCabRoster();
+            renderParkingGrids();
+            addBackendLog('CAB_DISPATCH_NOTIF', 'KA-01-GH-9204 (CAB-119)', 'C-04');
+
+            document.getElementById('cab-notif-time').textContent = 'Just now';
+            showToast('Office Cab Assigned!', 'CAB-119 (KA-01-GH-9204) is parked at Lane C, Slot C-04. GPS tracking active.', 'info');
+        }
+
+        function toggleCabTripSimulation() {
+            const btn = document.getElementById('btn-cab-trip');
+            const statusText = document.getElementById('active-cab-status');
+            const speedEl = document.getElementById('telemetry-speed');
+            const etaEl = document.getElementById('telemetry-eta');
+            const coordsEl = document.getElementById('gps-coords');
+            const marker = document.getElementById('svg-cab-marker');
+
+            // Waypoints along the SVG road path
+            const waypoints = [
+                { x: 85, y: 300, lat: '12.9716° N', lng: '77.5946° E', speed: '0 km/h', eta: 'Boarding at Bay' },
+                { x: 180, y: 300, lat: '12.9682° N', lng: '77.6012° E', speed: '22 km/h', eta: '24 mins' },
+                { x: 180, y: 180, lat: '12.9591° N', lng: '77.6140° E', speed: '34 km/h', eta: '19 mins' },
+                { x: 300, y: 180, lat: '12.9410° N', lng: '77.6285° E', speed: '46 km/h', eta: '14 mins' },
+                { x: 420, y: 180, lat: '12.9177° N', lng: '77.6391° E', speed: '38 km/h', eta: '9 mins' },
+                { x: 420, y: 80, lat: '12.8854° N', lng: '77.6512° E', speed: '42 km/h', eta: '4 mins' },
+                { x: 520, y: 80, lat: '12.8452° N', lng: '77.6602° E', speed: '0 km/h', eta: 'Arrived Safely ✓' }
+            ];
+
+            if (cabTripRunning) {
+                clearInterval(cabTripInterval);
+                cabTripRunning = false;
+                btn.innerHTML = `<i data-lucide="play" class="w-3.5 h-3.5 text-cyan-400"></i><span>Resume Route Simulation</span>`;
+                lucide.createIcons();
+                return;
+            }
+
+            cabTripRunning = true;
+            btn.innerHTML = `<i data-lucide="pause" class="w-3.5 h-3.5 text-amber-400"></i><span>Pause GPS Telemetry</span>`;
+            statusText.textContent = '● En-Route (GPS Live)';
+            statusText.className = 'text-cyan-600';
+            lucide.createIcons();
+
+            cabTripInterval = setInterval(() => {
+                cabTripProgress = (cabTripProgress + 1) % waypoints.length;
+                const pt = waypoints[cabTripProgress];
+                marker.setAttribute('transform', `translate(${pt.x}, ${pt.y})`);
+                coordsEl.textContent = `${pt.lat}, ${pt.lng}`;
+                speedEl.textContent = pt.speed;
+                etaEl.textContent = pt.eta;
+
+                if (cabTripProgress === waypoints.length - 1) {
+                    clearInterval(cabTripInterval);
+                    cabTripRunning = false;
+                    statusText.textContent = '● Trip Completed Safely';
+                    statusText.className = 'text-emerald-600';
+                    btn.innerHTML = `<i data-lucide="rotate-ccw" class="w-3.5 h-3.5 text-cyan-400"></i><span>Reset Cab to Lane C</span>`;
+                    lucide.createIcons();
+                    showToast('Commuter Drop Completed', 'Employee reached Drop Sector safely. Telemetry logged.', 'success');
+                }
+            }, 1400);
+        }
+
+        function triggerEmergencySOS() {
+            showToast('Safety SOS Alert Triggered', 'Live GPS coordinates transmitted to Corporate Security Desk & Campus Command.', 'danger');
+        }
+
+        // =========================================================================
+        // 6. ADMIN ANALYTICS, BACKEND LOGS & FEEDBACK
+        // =========================================================================
+        function addBackendLog(event, vehicle, slot) {
+            const now = new Date();
+            const time = now.toTimeString().slice(0, 8);
+            backendLogs.unshift({ time, event, vehicle, slot });
+            renderBackendLogs();
+            updateAnalyticsKPIs();
+        }
+
+        function renderBackendLogs() {
+            const tbody = document.getElementById('backend-logs-tbody');
+            tbody.innerHTML = '';
+
+            backendLogs.slice(0, 8).forEach(log => {
+                let badgeClass = 'bg-slate-100 text-slate-700';
+                if (log.event.includes('ENTRY')) badgeClass = 'bg-emerald-100 text-emerald-800';
+                else if (log.event.includes('EXIT')) badgeClass = 'bg-indigo-100 text-indigo-800';
+                else if (log.event.includes('CANCEL')) badgeClass = 'bg-rose-100 text-rose-800';
+                else if (log.event.includes('CAB')) badgeClass = 'bg-cyan-100 text-cyan-800';
+
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50';
+                tr.innerHTML = `
+                    <td class="py-2.5 px-3 font-mono text-slate-500">${log.time}</td>
+                    <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded font-mono text-[10px] font-bold ${badgeClass}">${log.event}</span></td>
+                    <td class="py-2.5 px-3 font-medium text-slate-800">${log.vehicle}</td>
+                    <td class="py-2.5 px-3 font-mono font-bold text-slate-900">${log.slot}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function updateAnalyticsKPIs() {
+            const total = parkingSlots.length;
+            const inUse = parkingSlots.filter(s => s.status !== 'available').length;
+            const pct = Math.round((inUse / total) * 100);
+
+            document.getElementById('kpi-occupancy').textContent = `${pct}%`;
+            document.getElementById('kpi-slots-fraction').textContent = `(${inUse} / ${total} slots)`;
+            document.getElementById('kpi-scans').textContent = 14 + backendLogs.length;
+            document.getElementById('kpi-co2').textContent = `${(38.4 + backendLogs.length * 1.1).toFixed(1)} kg`;
+        }
+
+        function initCharts() {
+            const zoneCtx = document.getElementById('zoneChart').getContext('2d');
+            zoneChartInstance = new Chart(zoneCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Lane A (Cars)', 'Lane B (Bikes)', 'Lane C (Office Cabs)'],
+                    datasets: [
+                        {
+                            label: 'Occupied / Active',
+                            data: [3, 3, 3],
+                            backgroundColor: ['#0f172a', '#10b981', '#06b6d4'],
+                            borderRadius: 6
+                        },
+                        {
+                            label: 'Available',
+                            data: [5, 5, 1],
+                            backgroundColor: '#e2e8f0',
+                            borderRadius: 6
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } },
+                    scales: {
+                        x: { stacked: true, grid: { display: false } },
+                        y: { stacked: true, beginAtZero: true, max: 8, ticks: { stepSize: 2 } }
+                    }
+                }
+            });
+
+            const peakCtx = document.getElementById('peakChart').getContext('2d');
+            peakChartInstance = new Chart(peakCtx, {
+                type: 'line',
+                data: {
+                    labels: ['08:00', '09:30 (Peak)', '11:00', '13:00', '15:00', '17:30 (Cab Rush)', '19:00'],
+                    datasets: [
+                        {
+                            label: 'Employee Vehicles (%)',
+                            data: [25, 88, 92, 85, 80, 65, 20],
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.12)',
+                            fill: true,
+                            tension: 0.35
+                        },
+                        {
+                            label: 'Office Cab Bay Activity (%)',
+                            data: [60, 95, 30, 40, 35, 98, 75],
+                            borderColor: '#06b6d4',
+                            backgroundColor: 'rgba(6, 182, 212, 0.1)',
+                            fill: true,
+                            tension: 0.35
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } },
+                    scales: {
+                        y: { beginAtZero: true, max: 100 }
+                    }
+                }
+            });
+        }
+
+        function updateCharts() {
+            if (!zoneChartInstance) return;
+            const aUsed = parkingSlots.filter(s => s.lane === 'A' && s.status !== 'available').length;
+            const bUsed = parkingSlots.filter(s => s.lane === 'B' && s.status !== 'available').length;
+            const cUsed = parkingSlots.filter(s => s.lane === 'C' && s.status !== 'available').length;
+
+            zoneChartInstance.data.datasets[0].data = [aUsed, bUsed, cUsed];
+            zoneChartInstance.data.datasets[1].data = [8 - aUsed, 8 - bUsed, 4 - cUsed];
+            zoneChartInstance.update();
+        }
+
+        function renderFeedbackList() {
+            const container = document.getElementById('feedback-list');
+            container.innerHTML = '';
+
+            userFeedbacks.forEach(fb => {
+                const stars = '★'.repeat(fb.rating) + '☆'.repeat(5 - fb.rating);
+                const div = document.createElement('div');
+                div.className = 'bg-slate-50 border border-slate-200/80 rounded-xl p-3 text-xs';
+                div.innerHTML = `
+                    <div class="flex items-center justify-between mb-1">
+                        <strong class="text-slate-900">${fb.name}</strong>
+                        <span class="text-amber-500 font-bold tracking-tight">${stars}</span>
+                    </div>
+                    <p class="text-slate-600 leading-relaxed">${fb.comment}</p>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function handleFeedbackSubmit(e) {
+            e.preventDefault();
+            const name = document.getElementById('fb-name').value.trim();
+            const rating = parseInt(document.getElementById('fb-rating').value, 10);
+            const comment = document.getElementById('fb-comment').value.trim();
+
+            if (!name || !comment) return;
+
+            userFeedbacks.unshift({ name, rating, comment });
+            renderFeedbackList();
+            document.getElementById('fb-name').value = '';
+            document.getElementById('fb-comment').value = '';
+            showToast('Feedback Recorded', 'Thank you! Your suggestion has been added to the VPMS improvement log.', 'success');
+        }
+
+        // =========================================================================
+        // 7. CREDITS MODAL CONTROLS
+        // =========================================================================
+        function openCreditsModal() {
+            document.getElementById('credits-modal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closeCreditsModal() {
+            document.getElementById('credits-modal').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
