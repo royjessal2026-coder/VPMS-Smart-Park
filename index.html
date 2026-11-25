@@ -33,7 +33,7 @@
   <div id="toast-container" class="fixed top-20 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none"></div>
 
   <!-- ========================================================================= -->
-  <!-- 1. HOME / AUTHENTICATION PORTAL (NO DATA SYNC OPTIONS ON HOME SCREEN)     -->
+  <!-- 1. HOME / AUTHENTICATION PORTAL (NO AUTOFILLED PASSWORDS, NO SYNC ON HOME)-->
   <!-- ========================================================================= -->
   <div id="login-view" class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950">
     <div class="max-w-4xl w-full bg-white rounded-3xl shadow-2xl overflow-hidden grid grid-cols-1 md:grid-cols-12 border border-slate-800/40">
@@ -47,37 +47,47 @@
           </div>
           <h1 class="text-2xl font-extrabold tracking-tight leading-snug">Vehicle Parking Management System</h1>
           <p class="text-slate-400 text-xs mt-3 leading-relaxed">
-            Automated corporate parking slot allocation, real-time dual-QR gate verification, indoor lane guidance, and office cab bay scheduling with email notifications.
+            Automated corporate parking slot allocation, real-time dual-QR gate verification, indoor lane guidance, and office cab bay scheduling with role-based access control.
           </p>
         </div>
 
         <div class="space-y-2.5 mt-8">
-          <p class="text-[11px] uppercase tracking-wider text-slate-400 font-bold">Quick Portal Fill</p>
+          <p class="text-[11px] uppercase tracking-wider text-slate-400 font-bold">Quick Email Fill (Password Required)</p>
           <button type="button" onclick="quickFill('user')" class="w-full text-left p-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 transition flex items-center justify-between group cursor-pointer">
             <div>
               <div class="text-xs font-bold text-white">User Login</div>
               <div class="text-[11px] text-slate-400 font-mono">user@smartfleet.services</div>
             </div>
-            <span class="text-xs text-emerald-400 font-bold group-hover:translate-x-0.5 transition">Fill &rarr;</span>
+            <span class="text-xs text-emerald-400 font-bold group-hover:translate-x-0.5 transition">Email &rarr;</span>
           </button>
           <button type="button" onclick="quickFill('admin')" class="w-full text-left p-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 transition flex items-center justify-between group cursor-pointer">
             <div>
               <div class="text-xs font-bold text-amber-300">Admin Login</div>
               <div class="text-[11px] text-slate-400 font-mono">admin@smartfleet.services</div>
             </div>
-            <span class="text-xs text-amber-300 font-bold group-hover:translate-x-0.5 transition">Fill &rarr;</span>
+            <span class="text-xs text-amber-300 font-bold group-hover:translate-x-0.5 transition">Email &rarr;</span>
+          </button>
+          <button type="button" onclick="quickFill('superadmin')" class="w-full text-left p-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-purple-500/40 transition flex items-center justify-between group cursor-pointer">
+            <div>
+              <div class="text-xs font-bold text-purple-300">Super Admin Login</div>
+              <div class="text-[11px] text-slate-400 font-mono">superadmin@smartfleet.services</div>
+            </div>
+            <span class="text-xs text-purple-300 font-bold group-hover:translate-x-0.5 transition">Email &rarr;</span>
           </button>
         </div>
       </div>
 
       <!-- Right Sign-In Form -->
       <div class="md:col-span-7 p-8 md:p-10 flex flex-col justify-center bg-white">
-        <div class="flex border-b border-slate-200 mb-6">
-          <button type="button" id="tab-role-user" onclick="setLoginMode('user')" class="pb-3 px-5 text-sm font-extrabold border-b-2 border-emerald-600 text-emerald-700 transition cursor-pointer">
+        <div class="flex border-b border-slate-200 mb-6 overflow-x-auto">
+          <button type="button" id="tab-role-user" onclick="setLoginMode('user')" class="pb-3 px-4 text-xs sm:text-sm font-extrabold border-b-2 border-emerald-600 text-emerald-700 transition whitespace-nowrap cursor-pointer">
             User Login
           </button>
-          <button type="button" id="tab-role-admin" onclick="setLoginMode('admin')" class="pb-3 px-5 text-sm font-extrabold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition cursor-pointer">
+          <button type="button" id="tab-role-admin" onclick="setLoginMode('admin')" class="pb-3 px-4 text-xs sm:text-sm font-extrabold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition whitespace-nowrap cursor-pointer">
             Admin Login
+          </button>
+          <button type="button" id="tab-role-superadmin" onclick="setLoginMode('superadmin')" class="pb-3 px-4 text-xs sm:text-sm font-extrabold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition whitespace-nowrap cursor-pointer">
+            Super Admin
           </button>
         </div>
 
@@ -88,14 +98,14 @@
 
         <div id="login-error-box" class="hidden mb-4 p-3 rounded-xl text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200"></div>
 
-        <form onsubmit="submitLogin(event)" class="space-y-4">
+        <form onsubmit="submitLogin(event)" autocomplete="off" class="space-y-4">
           <div>
             <label class="block text-xs font-bold text-slate-700 mb-1">Email ID</label>
-            <input type="email" id="input-login-email" required value="user@smartfleet.services" placeholder="user@smartfleet.services" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none" />
+            <input type="email" id="input-login-email" required autocomplete="off" value="" placeholder="Enter registered email ID" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none" />
           </div>
           <div>
             <label class="block text-xs font-bold text-slate-700 mb-1">Password</label>
-            <input type="password" id="input-login-password" required value="user123" placeholder="••••••••" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none" />
+            <input type="password" id="input-login-password" required autocomplete="new-password" value="" placeholder="Enter your password" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none" />
           </div>
           <button type="submit" id="btn-login-submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl text-sm shadow-lg shadow-emerald-600/20 transition cursor-pointer">
             Sign In to User Portal
@@ -103,7 +113,7 @@
         </form>
 
         <div class="mt-6 pt-4 border-t border-slate-100 text-[11px] text-slate-500 text-center">
-          Accounts are created exclusively by System Admin.
+          Admin accounts are provisioned by Super Admin; User accounts are provisioned by Admin.
         </div>
       </div>
     </div>
@@ -122,7 +132,7 @@
           <div>
             <div class="flex items-center gap-2">
               <span class="font-extrabold text-sm sm:text-base tracking-tight">SmartFleet VPMS</span>
-              <!-- Admin-Only Sync Status Badge -->
+              <!-- Admin / SuperAdmin-Only Sync Status Badge -->
               <span id="admin-header-sync-badge" class="view-hidden sm:inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-slate-800 text-emerald-300 border border-slate-700">
                 <span id="header-sync-dot" class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
                 <span id="header-sync-text">LOCAL + SHEETS</span>
@@ -343,7 +353,7 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <!-- Optical QR Gate Scanner -->
-          <div class="lg:col-span-5 bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-4">
+          <div id="admin-gate-terminal-card" class="lg:col-span-5 bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-4">
             <h3 class="text-base font-extrabold text-slate-900">Gate Optical QR Scanner Terminal</h3>
             <p class="text-xs text-slate-500">Paste scanned QR JSON payload or Booking ID to verify entry/exit at the boom barrier and sync to Google Sheets.</p>
             <textarea id="input-gate-scan" rows="3" placeholder='{"bookingId":"BK-123456","phase":"ENTRY"}' class="w-full p-3 rounded-xl border border-slate-300 font-mono text-xs"></textarea>
@@ -351,7 +361,7 @@
               <button type="button" onclick="verifyGatePayload()" class="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow cursor-pointer">
                 Verify QR &amp; Open Gate
               </button>
-              <button type="button" onclick="manualPullFromSheets(true)" class="px-3.5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold cursor-pointer">
+              <button type="button" id="btn-dashboard-pull-sheets" onclick="manualPullFromSheets(true)" class="px-3.5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold cursor-pointer">
                 Pull Sheets
               </button>
             </div>
@@ -359,7 +369,7 @@
           </div>
 
           <!-- Live Backend Audit Logs -->
-          <div class="lg:col-span-7 bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-3">
+          <div id="admin-audit-log-card" class="lg:col-span-7 bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-3">
             <div class="flex items-center justify-between">
               <h3 class="text-base font-extrabold text-slate-900">Live Backend &amp; QR Audit Log</h3>
               <span class="text-[11px] text-slate-400">Synced with AuditLogs sheet</span>
@@ -447,16 +457,16 @@
       </section>
 
       <!-- =================================================================== -->
-      <!-- ADMIN PORTAL TAB 3: USERS & ACCOUNTS                                -->
+      <!-- ADMIN PORTAL TAB 3: USERS & ACCOUNTS (EMPLOYEE / VISITOR USERS)     -->
       <!-- =================================================================== -->
       <section id="section-admin-users" class="view-hidden space-y-6">
         <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-5">
           <div>
-            <h2 class="text-lg font-extrabold text-slate-900">Admin User &amp; Account Provisioning</h2>
-            <p class="text-xs text-slate-500">Full privilege to create new User/Admin accounts with Mobile Number &amp; Email ID, edit credentials, or remove accounts. Synced to Users sheet.</p>
+            <h2 class="text-lg font-extrabold text-slate-900">Employee &amp; Visitor User Provisioning</h2>
+            <p class="text-xs text-slate-500">Create new User accounts with Mobile Number &amp; Email ID, edit credentials, or remove accounts. Synced to Users sheet.</p>
           </div>
 
-          <form onsubmit="handleAdminUserSave(event)" class="grid grid-cols-1 sm:grid-cols-4 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
+          <form onsubmit="handleAdminUserSave(event)" autocomplete="off" class="grid grid-cols-1 sm:grid-cols-4 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
             <input type="hidden" id="user-edit-orig-email" />
             <div>
               <label class="block text-[11px] font-bold text-slate-600 mb-1">Full Name</label>
@@ -472,14 +482,7 @@
             </div>
             <div>
               <label class="block text-[11px] font-bold text-slate-600 mb-1">Password</label>
-              <input type="text" id="user-input-pass" required placeholder="Password" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs" />
-            </div>
-            <div>
-              <label class="block text-[11px] font-bold text-slate-600 mb-1">Account Role</label>
-              <select id="user-input-role" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs">
-                <option value="user">User (Employee / Visitor)</option>
-                <option value="admin">Admin (Full Privilege)</option>
-              </select>
+              <input type="text" id="user-input-pass" required placeholder="Set Password" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs" />
             </div>
             <div>
               <label class="block text-[11px] font-bold text-slate-600 mb-1">Vehicle Type</label>
@@ -493,11 +496,11 @@
               <label class="block text-[11px] font-bold text-slate-600 mb-1">Vehicle Plate</label>
               <input type="text" id="user-input-plate" placeholder="KA-01-AB-1234" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs uppercase" />
             </div>
-            <div class="flex items-end gap-1.5">
+            <div class="sm:col-span-2 flex items-end gap-1.5">
               <button type="submit" id="btn-save-user" class="w-full py-2 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold cursor-pointer">
-                Create / Save User
+                Create / Save User Account
               </button>
-              <button type="button" onclick="resetUserEditor()" class="py-2 px-2.5 rounded-lg bg-white border border-slate-300 text-xs font-bold text-slate-600 cursor-pointer">
+              <button type="button" onclick="resetUserEditor()" class="py-2 px-3 rounded-lg bg-white border border-slate-300 text-xs font-bold text-slate-600 cursor-pointer">
                 Clear
               </button>
             </div>
@@ -510,7 +513,6 @@
                   <th class="py-2.5 px-3">Name</th>
                   <th class="py-2.5 px-3">Email ID</th>
                   <th class="py-2.5 px-3">Mobile Number</th>
-                  <th class="py-2.5 px-3">Role</th>
                   <th class="py-2.5 px-3">Vehicle</th>
                   <th class="py-2.5 px-3 text-right">Actions</th>
                 </tr>
@@ -581,6 +583,94 @@
       </section>
 
       <!-- =================================================================== -->
+      <!-- SUPER ADMIN TAB: ADMIN ACCOUNTS & ACCESS MANAGEMENT                 -->
+      <!-- =================================================================== -->
+      <section id="section-superadmin-admins" class="view-hidden space-y-6">
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-5">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <span class="px-2.5 py-1 rounded-full bg-purple-100 text-purple-800 text-[11px] font-bold">SUPER ADMIN ACCESS CONTROL</span>
+              <h2 class="text-lg font-extrabold text-slate-900 mt-1">Create Admin Accounts &amp; Manage Module Permissions</h2>
+              <p class="text-xs text-slate-500">Provision administrator accounts and control which operational modules each Admin can access.</p>
+            </div>
+          </div>
+
+          <form onsubmit="handleSuperAdminSave(event)" autocomplete="off" class="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4">
+            <input type="hidden" id="sa-edit-orig-email" />
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+              <div>
+                <label class="block text-[11px] font-bold text-slate-600 mb-1">Admin Full Name</label>
+                <input type="text" id="sa-input-name" required placeholder="Facility Admin Name" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs bg-white" />
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-600 mb-1">Admin Email ID</label>
+                <input type="email" id="sa-input-email" required placeholder="ops.admin@smartfleet.services" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs bg-white" />
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-600 mb-1">Mobile Number</label>
+                <input type="tel" id="sa-input-mobile" required placeholder="+91 9876500001" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs bg-white" />
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-600 mb-1">Admin Password</label>
+                <input type="text" id="sa-input-pass" required placeholder="Set Admin Password" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs bg-white" />
+              </div>
+            </div>
+
+            <!-- Granular Access Permissions Checkboxes -->
+            <div class="bg-white p-3.5 rounded-xl border border-slate-200">
+              <div class="text-[11px] font-extrabold uppercase text-slate-600 mb-2.5">Granted Admin Access Permissions</div>
+              <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 text-xs">
+                <label class="inline-flex items-center gap-2 font-semibold text-slate-700 cursor-pointer">
+                  <input type="checkbox" id="perm-gate" checked class="rounded text-emerald-600" />
+                  <span>QR Gate Scanner</span>
+                </label>
+                <label class="inline-flex items-center gap-2 font-semibold text-slate-700 cursor-pointer">
+                  <input type="checkbox" id="perm-slots" checked class="rounded text-emerald-600" />
+                  <span>Manage Slots</span>
+                </label>
+                <label class="inline-flex items-center gap-2 font-semibold text-slate-700 cursor-pointer">
+                  <input type="checkbox" id="perm-users" checked class="rounded text-emerald-600" />
+                  <span>Manage Users</span>
+                </label>
+                <label class="inline-flex items-center gap-2 font-semibold text-slate-700 cursor-pointer">
+                  <input type="checkbox" id="perm-cabs" checked class="rounded text-emerald-600" />
+                  <span>Cab Scheduling</span>
+                </label>
+                <label class="inline-flex items-center gap-2 font-semibold text-slate-700 cursor-pointer">
+                  <input type="checkbox" id="perm-sheets" checked class="rounded text-emerald-600" />
+                  <span>Google Sheets Sync</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="flex gap-2 justify-end">
+              <button type="button" onclick="resetSuperAdminEditor()" class="px-4 py-2 rounded-lg bg-white border border-slate-300 text-xs font-bold text-slate-600 cursor-pointer">
+                Clear
+              </button>
+              <button type="submit" id="btn-save-sa" class="px-5 py-2 rounded-lg bg-purple-700 hover:bg-purple-800 text-white text-xs font-bold shadow cursor-pointer">
+                Create / Update Admin Account
+              </button>
+            </div>
+          </form>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="border-b border-slate-200 text-slate-500 uppercase text-[11px]">
+                  <th class="py-2.5 px-3">Admin Name</th>
+                  <th class="py-2.5 px-3">Email ID</th>
+                  <th class="py-2.5 px-3">Mobile</th>
+                  <th class="py-2.5 px-3">Module Access Permissions</th>
+                  <th class="py-2.5 px-3 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="superadmin-admins-table" class="divide-y divide-slate-100"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- =================================================================== -->
       <!-- ADMIN PORTAL TAB 5: GOOGLE SHEETS DB & APPS SCRIPT (CODE.GS)        -->
       <!-- =================================================================== -->
       <section id="section-admin-sheets" class="view-hidden space-y-6">
@@ -589,7 +679,7 @@
             <div>
               <span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-bold">TWO-WAY PAYLOAD STORAGE</span>
               <h2 class="text-lg font-extrabold text-slate-900 mt-1">Google Sheets &amp; Apps Script Backend Setup</h2>
-              <p class="text-xs text-slate-500">Every slot booking, QR scan, user creation/update, cab schedule, email alert, and feedback entry flows via JSON payload to your Google Sheet.</p>
+              <p class="text-xs text-slate-500">Every slot booking, QR scan, user/admin creation, cab schedule, email alert, and feedback entry flows via JSON payload to your Google Sheet.</p>
             </div>
             <div class="flex gap-2">
               <button type="button" onclick="pushAllToSheets(true)" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold cursor-pointer">
@@ -746,7 +836,7 @@
   </div>
 
   <!-- ========================================================================= -->
-  <!-- 6. APPLICATION JAVASCRIPT & TWO-WAY GOOGLE SHEETS PAYLOAD ENGINE          -->
+  <!-- 6. APPLICATION JAVASCRIPT & ROLE-BASED ACCESS CONTROL ENGINE              -->
   <!-- ========================================================================= -->
   <script>
     // Complete Google Apps Script Backend (Code.gs)
@@ -756,7 +846,7 @@
  */
 const SCHEMAS = {
   Slots: ['id', 'lane', 'type', 'status', 'plate', 'bookedBy', 'bookingId', 'updatedAt'],
-  Users: ['email', 'name', 'mobile', 'password', 'role', 'vehicleType', 'plate', 'updatedAt'],
+  Users: ['email', 'name', 'mobile', 'password', 'role', 'permissions', 'vehicleType', 'plate', 'updatedAt'],
   Bookings: ['bookingId', 'userEmail', 'userName', 'slotId', 'lane', 'plate', 'phase', 'expiresAt', 'createdAt', 'updatedAt'],
   CabAllocations: ['cabId', 'userEmail', 'userName', 'userMobile', 'slotId', 'cabPlate', 'driver', 'pickupTime', 'route', 'status', 'updatedAt'],
   SentEmails: ['emailId', 'to', 'mobile', 'subject', 'body', 'sentAt'],
@@ -794,7 +884,10 @@ function upsertRecord_(ss, sheetName, keyField, record) {
   const headers = SCHEMAS[sheetName];
   const data = sh.getDataRange().getValues();
   const keyIdx = headers.indexOf(keyField);
-  const rowValues = headers.map(h => record[h] !== undefined ? record[h] : '');
+  const rowValues = headers.map(h => {
+    const val = record[h];
+    return typeof val === 'object' && val !== null ? JSON.stringify(val) : (val !== undefined ? val : '');
+  });
 
   for (let r = 1; r < data.length; r++) {
     if (String(data[r][keyIdx]) === String(record[keyField])) {
@@ -873,14 +966,47 @@ function doPost(e) {
       return list;
     }
 
+    const FULL_ADMIN_PERMS = { gate: true, slots: true, users: true, cabs: true, sheets: true };
+
     const BUILTIN_USERS = [
-      { email: 'user@smartfleet.services', name: 'User', mobile: '+91 9876543210', password: 'user123', role: 'user', vehicleType: 'Car', plate: 'KA-01-MJ-2026', updatedAt: new Date().toISOString() },
-      { email: 'admin@smartfleet.services', name: 'System Admin', mobile: '+91 9900112233', password: 'admin123', role: 'admin', vehicleType: 'Car', plate: 'ADMIN-01', updatedAt: new Date().toISOString() }
+      {
+        email: 'user@smartfleet.services',
+        name: 'User',
+        mobile: '+91 9876543210',
+        password: 'user@123',
+        role: 'user',
+        permissions: null,
+        vehicleType: 'Car',
+        plate: 'KA-01-MJ-2026',
+        updatedAt: new Date().toISOString()
+      },
+      {
+        email: 'admin@smartfleet.services',
+        name: 'System Admin',
+        mobile: '+91 9900112233',
+        password: 'admin@123',
+        role: 'admin',
+        permissions: { ...FULL_ADMIN_PERMS },
+        vehicleType: 'Car',
+        plate: 'ADMIN-01',
+        updatedAt: new Date().toISOString()
+      },
+      {
+        email: 'superadmin@smartfleet.services',
+        name: 'Super Admin',
+        mobile: '+91 9900000001',
+        password: 'Sadmin@123',
+        role: 'superadmin',
+        permissions: { ...FULL_ADMIN_PERMS },
+        vehicleType: 'Car',
+        plate: 'SADMIN-01',
+        updatedAt: new Date().toISOString()
+      }
     ];
 
-    const DB_STORAGE_KEY = 'smartfleet_vpms_hybrid_v6';
-    const SHEETS_ENDPOINT_KEY = 'smartfleet_sheets_url_v6';
-    const ACTIVE_USER_KEY = 'smartfleet_logged_user_v6';
+    const DB_STORAGE_KEY = 'smartfleet_vpms_rbac_v7';
+    const SHEETS_ENDPOINT_KEY = 'smartfleet_sheets_url_v7';
+    const ACTIVE_USER_KEY = 'smartfleet_logged_user_v7';
 
     let db = {
       slots: buildInitialSlots(),
@@ -895,6 +1021,24 @@ function doPost(e) {
     let currentUser = null;
     let loginMode = 'user';
     let timerHandle = null;
+
+    function normalizeUserRecord(u) {
+      if (typeof u.permissions === 'string') {
+        try { u.permissions = JSON.parse(u.permissions); } catch (e) { u.permissions = { ...FULL_ADMIN_PERMS }; }
+      }
+      if ((u.role === 'admin' || u.role === 'superadmin') && !u.permissions) {
+        u.permissions = { ...FULL_ADMIN_PERMS };
+      }
+      return u;
+    }
+
+    function hasPerm(permKey) {
+      if (!currentUser) return false;
+      if (currentUser.role === 'superadmin') return true;
+      if (currentUser.role !== 'admin') return false;
+      const perms = currentUser.permissions || FULL_ADMIN_PERMS;
+      return Boolean(perms[permKey]);
+    }
 
     function showToast(title, message, type = 'info') {
       const container = document.getElementById('toast-container');
@@ -934,7 +1078,7 @@ function doPost(e) {
           db.logs = parsed.logs || [];
           db.feedbacks = parsed.feedbacks || [];
 
-          const storedUsers = Array.isArray(parsed.users) ? parsed.users : [];
+          const storedUsers = Array.isArray(parsed.users) ? parsed.users.map(normalizeUserRecord) : [];
           const mergedUsers = [...storedUsers];
           BUILTIN_USERS.forEach(defU => {
             if (!mergedUsers.some(u => String(u.email).toLowerCase() === defU.email)) {
@@ -995,7 +1139,7 @@ function doPost(e) {
     async function pushAllToSheets(notify = false) {
       const url = getEndpoint();
       if (!url) {
-        if (notify && currentUser && currentUser.role === 'admin') openSheetsModal();
+        if (notify && hasPerm('sheets')) openSheetsModal();
         return;
       }
       updateSheetsIndicators('PUSHING ALL...', 'bg-amber-400');
@@ -1027,7 +1171,7 @@ function doPost(e) {
           if (Array.isArray(data.slots) && data.slots.length > 0) {
             db.slots = data.slots;
             if (Array.isArray(data.users) && data.users.length > 0) {
-              db.users = data.users;
+              db.users = data.users.map(normalizeUserRecord);
               BUILTIN_USERS.forEach(defU => {
                 if (!db.users.some(u => String(u.email).toLowerCase() === defU.email)) {
                   db.users.push(defU);
@@ -1053,7 +1197,7 @@ function doPost(e) {
 
     function manualPullFromSheets(notify = false) {
       if (!getEndpoint()) {
-        if (currentUser && currentUser.role === 'admin') openSheetsModal();
+        if (hasPerm('sheets')) openSheetsModal();
         return;
       }
       pullFromSheets(true);
@@ -1079,24 +1223,34 @@ function doPost(e) {
       loginMode = mode;
       const uTab = document.getElementById('tab-role-user');
       const aTab = document.getElementById('tab-role-admin');
+      const saTab = document.getElementById('tab-role-superadmin');
       const title = document.getElementById('login-title');
       const sub = document.getElementById('login-subtitle');
       const btn = document.getElementById('btn-login-submit');
 
+      const inactiveClass = 'pb-3 px-4 text-xs sm:text-sm font-extrabold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition whitespace-nowrap cursor-pointer';
+      uTab.className = inactiveClass;
+      aTab.className = inactiveClass;
+      saTab.className = inactiveClass;
+
       if (mode === 'user') {
-        uTab.className = 'pb-3 px-5 text-sm font-extrabold border-b-2 border-emerald-600 text-emerald-700 transition cursor-pointer';
-        aTab.className = 'pb-3 px-5 text-sm font-extrabold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition cursor-pointer';
+        uTab.className = 'pb-3 px-4 text-xs sm:text-sm font-extrabold border-b-2 border-emerald-600 text-emerald-700 transition whitespace-nowrap cursor-pointer';
         title.textContent = 'User Account Sign In';
         sub.textContent = 'Enter your Email ID and Password issued by the Administrator.';
         btn.textContent = 'Sign In to User Portal';
         btn.className = 'w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl text-sm shadow-lg shadow-emerald-600/20 transition cursor-pointer';
-      } else {
-        aTab.className = 'pb-3 px-5 text-sm font-extrabold border-b-2 border-amber-500 text-amber-700 transition cursor-pointer';
-        uTab.className = 'pb-3 px-5 text-sm font-extrabold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition cursor-pointer';
+      } else if (mode === 'admin') {
+        aTab.className = 'pb-3 px-4 text-xs sm:text-sm font-extrabold border-b-2 border-amber-500 text-amber-700 transition whitespace-nowrap cursor-pointer';
         title.textContent = 'Admin Control Sign In';
-        sub.textContent = 'Full access to manage slots, user accounts, QR gate verification, cab scheduling & Google Sheets DB.';
+        sub.textContent = 'Sign in with your Admin credentials granted by the Super Admin.';
         btn.textContent = 'Sign In to Admin Console';
         btn.className = 'w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 rounded-xl text-sm shadow-lg transition cursor-pointer';
+      } else {
+        saTab.className = 'pb-3 px-4 text-xs sm:text-sm font-extrabold border-b-2 border-purple-600 text-purple-700 transition whitespace-nowrap cursor-pointer';
+        title.textContent = 'Super Admin Sign In';
+        sub.textContent = 'Master access to create Admin accounts, manage Admin permissions & control all facility operations.';
+        btn.textContent = 'Sign In as Super Admin';
+        btn.className = 'w-full bg-purple-700 hover:bg-purple-800 text-white font-bold py-3 rounded-xl text-sm shadow-lg shadow-purple-700/20 transition cursor-pointer';
       }
     }
 
@@ -1104,11 +1258,14 @@ function doPost(e) {
       setLoginMode(mode);
       if (mode === 'user') {
         document.getElementById('input-login-email').value = 'user@smartfleet.services';
-        document.getElementById('input-login-password').value = 'user123';
-      } else {
+      } else if (mode === 'admin') {
         document.getElementById('input-login-email').value = 'admin@smartfleet.services';
-        document.getElementById('input-login-password').value = 'admin123';
+      } else {
+        document.getElementById('input-login-email').value = 'superadmin@smartfleet.services';
       }
+      const passInput = document.getElementById('input-login-password');
+      passInput.value = '';
+      passInput.focus();
     }
 
     function submitLogin(e) {
@@ -1120,20 +1277,31 @@ function doPost(e) {
 
       const matched = db.users.find(u => String(u.email).trim().toLowerCase() === email && String(u.password).trim() === pass);
       if (!matched) {
-        errBox.textContent = 'Invalid Email ID or Password. Click "Fill ->" on the left panel or verify your credentials.';
+        errBox.textContent = 'Invalid Email ID or Password. Please check your credentials and try again.';
         errBox.classList.remove('hidden');
         return;
       }
       if (loginMode === 'admin' && matched.role !== 'admin') {
-        errBox.textContent = 'This account is a User account. Switch to the "User Login" tab to sign in.';
+        errBox.textContent = 'This account is not an Admin account. Select the matching login tab above.';
+        errBox.classList.remove('hidden');
+        return;
+      }
+      if (loginMode === 'superadmin' && matched.role !== 'superadmin') {
+        errBox.textContent = 'Access denied: Only Super Admin credentials can sign in here.';
+        errBox.classList.remove('hidden');
+        return;
+      }
+      if (loginMode === 'user' && matched.role !== 'user') {
+        errBox.textContent = 'Admin/Super Admin accounts must sign in using their respective tabs above.';
         errBox.classList.remove('hidden');
         return;
       }
 
-      currentUser = matched;
-      localStorage.setItem(ACTIVE_USER_KEY, JSON.stringify(matched));
+      currentUser = normalizeUserRecord(matched);
+      localStorage.setItem(ACTIVE_USER_KEY, JSON.stringify(currentUser));
+      document.getElementById('input-login-password').value = '';
       openAuthenticatedApp();
-      showToast(`Welcome, ${currentUser.name}`, `Signed in to ${currentUser.role.toUpperCase()} Portal.`, 'success');
+      showToast(`Welcome, ${currentUser.name}`, `Signed in as ${currentUser.role.toUpperCase()}.`, 'success');
     }
 
     function openAuthenticatedApp() {
@@ -1147,21 +1315,36 @@ function doPost(e) {
       const adminSyncBadge = document.getElementById('admin-header-sync-badge');
       const adminFooterBtn = document.getElementById('admin-footer-sheets-btn');
 
-      if (currentUser.role === 'admin') {
-        // Show Data Sync options ONLY inside Admin Login
-        adminSheetsBtn.classList.remove('view-hidden');
-        adminSyncBadge.classList.remove('view-hidden');
-        adminFooterBtn.classList.remove('view-hidden');
-        nav.innerHTML = `
-          <button type="button" onclick="openSection('section-admin-dashboard')" id="nav-section-admin-dashboard" class="px-3 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap cursor-pointer">Analytics &amp; QR Gate</button>
-          <button type="button" onclick="openSection('section-admin-slots')" id="nav-section-admin-slots" class="px-3 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap cursor-pointer">Manage Slots</button>
-          <button type="button" onclick="openSection('section-admin-users')" id="nav-section-admin-users" class="px-3 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap cursor-pointer">Users &amp; Accounts</button>
-          <button type="button" onclick="openSection('section-admin-cabs')" id="nav-section-admin-cabs" class="px-3 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap cursor-pointer">Cab Scheduling &amp; Mail</button>
-          <button type="button" onclick="openSection('section-admin-sheets')" id="nav-section-admin-sheets" class="px-3 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap cursor-pointer">Google Sheets DB</button>
-        `;
+      if (currentUser.role === 'admin' || currentUser.role === 'superadmin') {
+        if (hasPerm('sheets')) {
+          adminSheetsBtn.classList.remove('view-hidden');
+          adminSyncBadge.classList.remove('view-hidden');
+          adminFooterBtn.classList.remove('view-hidden');
+        } else {
+          adminSheetsBtn.classList.add('view-hidden');
+          adminSyncBadge.classList.add('view-hidden');
+          adminFooterBtn.classList.add('view-hidden');
+        }
+
+        let navHtml = `<button type="button" onclick="openSection('section-admin-dashboard')" id="nav-section-admin-dashboard" class="px-3 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap cursor-pointer">Analytics &amp; Gate</button>`;
+        if (hasPerm('slots')) {
+          navHtml += `<button type="button" onclick="openSection('section-admin-slots')" id="nav-section-admin-slots" class="px-3 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap cursor-pointer">Manage Slots</button>`;
+        }
+        if (hasPerm('users')) {
+          navHtml += `<button type="button" onclick="openSection('section-admin-users')" id="nav-section-admin-users" class="px-3 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap cursor-pointer">Users</button>`;
+        }
+        if (hasPerm('cabs')) {
+          navHtml += `<button type="button" onclick="openSection('section-admin-cabs')" id="nav-section-admin-cabs" class="px-3 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap cursor-pointer">Cab &amp; Mail</button>`;
+        }
+        if (currentUser.role === 'superadmin') {
+          navHtml += `<button type="button" onclick="openSection('section-superadmin-admins')" id="nav-section-superadmin-admins" class="px-3 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap cursor-pointer">Admin Access</button>`;
+        }
+        if (hasPerm('sheets')) {
+          navHtml += `<button type="button" onclick="openSection('section-admin-sheets')" id="nav-section-admin-sheets" class="px-3 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap cursor-pointer">Sheets DB</button>`;
+        }
+        nav.innerHTML = navHtml;
         openSection('section-admin-dashboard');
       } else {
-        // Strictly hide Data Sync options inside User Login
         adminSheetsBtn.classList.add('view-hidden');
         adminSyncBadge.classList.add('view-hidden');
         adminFooterBtn.classList.add('view-hidden');
@@ -1183,16 +1366,22 @@ function doPost(e) {
       document.getElementById('admin-footer-sheets-btn').classList.add('view-hidden');
       document.getElementById('modal-sheets').classList.add('view-hidden');
       document.getElementById('app-shell').classList.add('view-hidden');
+      document.getElementById('input-login-password').value = '';
       document.getElementById('login-view').classList.remove('view-hidden');
     }
 
     function openSection(sectionId) {
-      if (sectionId.startsWith('section-admin-') && (!currentUser || currentUser.role !== 'admin')) {
-        return;
-      }
+      if (!currentUser) return;
+      if (sectionId === 'section-superadmin-admins' && currentUser.role !== 'superadmin') return;
+      if (sectionId === 'section-admin-slots' && !hasPerm('slots')) return;
+      if (sectionId === 'section-admin-users' && !hasPerm('users')) return;
+      if (sectionId === 'section-admin-cabs' && !hasPerm('cabs')) return;
+      if (sectionId === 'section-admin-sheets' && !hasPerm('sheets')) return;
+
       const sections = [
         'section-user-parking', 'section-user-cabs', 'section-user-feedback',
-        'section-admin-dashboard', 'section-admin-slots', 'section-admin-users', 'section-admin-cabs', 'section-admin-sheets'
+        'section-admin-dashboard', 'section-admin-slots', 'section-admin-users',
+        'section-admin-cabs', 'section-superadmin-admins', 'section-admin-sheets'
       ];
       sections.forEach(id => {
         const el = document.getElementById(id);
@@ -1215,10 +1404,11 @@ function doPost(e) {
         renderUserCabView();
       } else {
         renderAdminOverview();
-        renderAdminSlotsTable();
-        renderAdminUsersTable();
-        renderAdminCabConsole();
-        renderAdminSheetsTab();
+        if (hasPerm('slots')) renderAdminSlotsTable();
+        if (hasPerm('users')) renderAdminUsersTable();
+        if (hasPerm('cabs')) renderAdminCabConsole();
+        if (currentUser.role === 'superadmin') renderSuperAdminTable();
+        if (hasPerm('sheets')) renderAdminSheetsTab();
       }
     }
 
@@ -1555,12 +1745,30 @@ function doPost(e) {
       showToast('Feedback Submitted', 'Thank you! Your feedback has been recorded.', 'success');
     }
 
-    // ==================== ADMIN PORTAL FUNCTIONS ====================
+    // ==================== ADMIN & SUPER ADMIN PORTAL FUNCTIONS ====================
     function renderAdminOverview() {
       document.getElementById('admin-kpi-total').textContent = db.slots.length;
       document.getElementById('admin-kpi-avail').textContent = db.slots.filter(s => s.status === 'AVAILABLE').length;
       document.getElementById('admin-kpi-busy').textContent = db.slots.filter(s => s.status !== 'AVAILABLE').length;
       document.getElementById('admin-kpi-users').textContent = db.users.length;
+
+      const gateCard = document.getElementById('admin-gate-terminal-card');
+      const auditCard = document.getElementById('admin-audit-log-card');
+      const pullBtn = document.getElementById('btn-dashboard-pull-sheets');
+
+      if (hasPerm('gate')) {
+        gateCard.classList.remove('view-hidden');
+        auditCard.className = 'lg:col-span-7 bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-3';
+      } else {
+        gateCard.classList.add('view-hidden');
+        auditCard.className = 'lg:col-span-12 bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-3';
+      }
+
+      if (hasPerm('sheets')) {
+        pullBtn.classList.remove('view-hidden');
+      } else {
+        pullBtn.classList.add('view-hidden');
+      }
 
       const logsBox = document.getElementById('admin-logs-container');
       if (db.logs.length === 0) {
@@ -1580,6 +1788,7 @@ function doPost(e) {
     }
 
     function verifyGatePayload() {
+      if (!hasPerm('gate')) return;
       const raw = document.getElementById('input-gate-scan').value.trim();
       const box = document.getElementById('gate-scan-feedback');
       if (!raw) return;
@@ -1660,6 +1869,7 @@ function doPost(e) {
 
     function handleAdminSlotSave(e) {
       e.preventDefault();
+      if (!hasPerm('slots')) return;
       const origId = document.getElementById('slot-edit-orig-id').value;
       const id = document.getElementById('slot-input-id').value.trim().toUpperCase();
       const lane = document.getElementById('slot-input-lane').value;
@@ -1691,7 +1901,7 @@ function doPost(e) {
       recordAudit('ADMIN_SLOT_UPDATED', id, `${id} (${lane}) set to ${status}`);
       resetSlotEditor();
       renderAdminSlotsTable();
-      showToast('Slot Saved', `Slot ${id} synced to Google Sheets.`, 'success');
+      showToast('Slot Saved', `Slot ${id} updated.`, 'success');
     }
 
     function loadSlotIntoEditor(id) {
@@ -1714,6 +1924,7 @@ function doPost(e) {
     }
 
     function adminFreeSlot(id) {
+      if (!hasPerm('slots')) return;
       const s = db.slots.find(x => x.id === id);
       if (!s) return;
       s.status = 'AVAILABLE';
@@ -1728,6 +1939,7 @@ function doPost(e) {
     }
 
     function adminDeleteSlot(id) {
+      if (!hasPerm('slots')) return;
       db.slots = db.slots.filter(s => s.id !== id);
       removeFromSheets('Slots', 'id', id);
       recordAudit('ADMIN_SLOT_DELETED', id, 'Deleted slot');
@@ -1736,6 +1948,7 @@ function doPost(e) {
     }
 
     function adminResetAllSlots() {
+      if (!hasPerm('slots')) return;
       db.slots.forEach(s => {
         s.status = 'AVAILABLE';
         s.plate = '';
@@ -1751,19 +1964,19 @@ function doPost(e) {
       showToast('All Slots Available', 'Every slot across Lanes A, B, and C is now Available.', 'success');
     }
 
-    // Admin Users CRUD
+    // Admin Users CRUD (Employee/Visitor User Accounts Only)
     function renderAdminUsersTable() {
       const tbody = document.getElementById('admin-users-table');
-      tbody.innerHTML = db.users.map(u => `
+      const regularUsers = db.users.filter(u => u.role === 'user');
+      tbody.innerHTML = regularUsers.map(u => `
         <tr class="hover:bg-slate-50">
           <td class="py-2.5 px-3 font-bold text-slate-900">${u.name}</td>
           <td class="py-2.5 px-3 font-mono text-slate-700">${u.email}</td>
           <td class="py-2.5 px-3 font-mono text-slate-700">${u.mobile || '—'}</td>
-          <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase ${u.role === 'admin' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}">${u.role}</span></td>
           <td class="py-2.5 px-3 font-mono">${u.vehicleType || 'Car'} (${u.plate || '—'})</td>
           <td class="py-2.5 px-3 text-right space-x-1">
             <button type="button" onclick="loadUserIntoEditor('${u.email}')" class="px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold cursor-pointer">Edit</button>
-            ${u.email !== 'admin@smartfleet.services' ? `<button type="button" onclick="adminDeleteUser('${u.email}')" class="px-2.5 py-1 rounded bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold cursor-pointer">Delete</button>` : ''}
+            <button type="button" onclick="adminDeleteUser('${u.email}')" class="px-2.5 py-1 rounded bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold cursor-pointer">Delete</button>
           </td>
         </tr>
       `).join('');
@@ -1771,12 +1984,12 @@ function doPost(e) {
 
     function handleAdminUserSave(e) {
       e.preventDefault();
+      if (!hasPerm('users')) return;
       const origEmail = document.getElementById('user-edit-orig-email').value.toLowerCase();
       const name = document.getElementById('user-input-name').value.trim();
       const email = document.getElementById('user-input-email').value.trim().toLowerCase();
       const mobile = document.getElementById('user-input-mobile').value.trim();
       const password = document.getElementById('user-input-pass').value.trim();
-      const role = document.getElementById('user-input-role').value;
       const vehicleType = document.getElementById('user-input-vtype').value;
       const plate = document.getElementById('user-input-plate').value.trim().toUpperCase();
 
@@ -1790,7 +2003,8 @@ function doPost(e) {
         name,
         mobile,
         password,
-        role,
+        role: 'user',
+        permissions: null,
         vehicleType,
         plate,
         updatedAt: new Date().toISOString()
@@ -1801,11 +2015,11 @@ function doPost(e) {
       else db.users.push(record);
 
       upsertToSheets('Users', 'email', record);
-      recordAudit('ADMIN_USER_SAVED', email, `Saved ${role} account (${mobile})`);
+      recordAudit('ADMIN_USER_SAVED', email, `Saved user account (${mobile})`);
       resetUserEditor();
       renderAdminUsersTable();
-      renderAdminCabConsole();
-      showToast('Account Saved', `${name} (${email}) saved to Users sheet.`, 'success');
+      if (hasPerm('cabs')) renderAdminCabConsole();
+      showToast('User Account Saved', `${name} (${email}) saved.`, 'success');
     }
 
     function loadUserIntoEditor(email) {
@@ -1816,10 +2030,9 @@ function doPost(e) {
       document.getElementById('user-input-email').value = u.email;
       document.getElementById('user-input-mobile').value = u.mobile || '';
       document.getElementById('user-input-pass').value = u.password;
-      document.getElementById('user-input-role').value = u.role;
       document.getElementById('user-input-vtype').value = u.vehicleType || 'Car';
       document.getElementById('user-input-plate').value = u.plate || '';
-      document.getElementById('btn-save-user').textContent = 'Update Account';
+      document.getElementById('btn-save-user').textContent = 'Update User Account';
     }
 
     function resetUserEditor() {
@@ -1829,20 +2042,141 @@ function doPost(e) {
       document.getElementById('user-input-mobile').value = '';
       document.getElementById('user-input-pass').value = '';
       document.getElementById('user-input-plate').value = '';
-      document.getElementById('btn-save-user').textContent = 'Create / Save User';
+      document.getElementById('btn-save-user').textContent = 'Create / Save User Account';
     }
 
     function adminDeleteUser(email) {
+      if (!hasPerm('users')) return;
       db.users = db.users.filter(u => u.email.toLowerCase() !== email.toLowerCase());
       removeFromSheets('Users', 'email', email);
       recordAudit('ADMIN_USER_DELETED', email, 'Removed user account');
       renderAdminUsersTable();
-      showToast('Account Deleted', `Removed ${email}.`, 'info');
+      showToast('User Deleted', `Removed ${email}.`, 'info');
+    }
+
+    // ==================== SUPER ADMIN: ADMIN ACCOUNTS & PERMISSIONS ====================
+    function renderSuperAdminTable() {
+      const tbody = document.getElementById('superadmin-admins-table');
+      const admins = db.users.filter(u => u.role === 'admin' || u.role === 'superadmin');
+      tbody.innerHTML = admins.map(a => {
+        const p = a.permissions || FULL_ADMIN_PERMS;
+        const badges = a.role === 'superadmin'
+          ? `<span class="px-2 py-0.5 rounded bg-purple-100 text-purple-800 font-bold text-[10px]">SUPER ADMIN (ALL ACCESS)</span>`
+          : [
+              p.gate ? 'QR Gate' : null,
+              p.slots ? 'Slots' : null,
+              p.users ? 'Users' : null,
+              p.cabs ? 'Cabs' : null,
+              p.sheets ? 'Sheets Sync' : null
+            ].filter(Boolean).map(label => `<span class="inline-block mr-1 mb-1 px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold">${label}</span>`).join('') || '<span class="text-slate-400">No Modules Granted</span>';
+
+        return `
+          <tr class="hover:bg-slate-50">
+            <td class="py-2.5 px-3 font-bold text-slate-900">${a.name}</td>
+            <td class="py-2.5 px-3 font-mono text-slate-700">${a.email}</td>
+            <td class="py-2.5 px-3 font-mono text-slate-700">${a.mobile || '—'}</td>
+            <td class="py-2.5 px-3">${badges}</td>
+            <td class="py-2.5 px-3 text-right space-x-1">
+              ${a.role !== 'superadmin' ? `
+                <button type="button" onclick="loadAdminIntoSuperEditor('${a.email}')" class="px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold cursor-pointer">Edit Access</button>
+                <button type="button" onclick="deleteAdminAccount('${a.email}')" class="px-2.5 py-1 rounded bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold cursor-pointer">Delete</button>
+              ` : '<span class="text-[11px] text-slate-400 font-semibold">Protected</span>'}
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function handleSuperAdminSave(e) {
+      e.preventDefault();
+      if (!currentUser || currentUser.role !== 'superadmin') return;
+
+      const origEmail = document.getElementById('sa-edit-orig-email').value.toLowerCase();
+      const name = document.getElementById('sa-input-name').value.trim();
+      const email = document.getElementById('sa-input-email').value.trim().toLowerCase();
+      const mobile = document.getElementById('sa-input-mobile').value.trim();
+      const password = document.getElementById('sa-input-pass').value.trim();
+
+      const permissions = {
+        gate: document.getElementById('perm-gate').checked,
+        slots: document.getElementById('perm-slots').checked,
+        users: document.getElementById('perm-users').checked,
+        cabs: document.getElementById('perm-cabs').checked,
+        sheets: document.getElementById('perm-sheets').checked
+      };
+
+      if (origEmail && origEmail !== email) {
+        db.users = db.users.filter(u => u.email.toLowerCase() !== origEmail);
+        removeFromSheets('Users', 'email', origEmail);
+      }
+
+      const record = {
+        email,
+        name,
+        mobile,
+        password,
+        role: 'admin',
+        permissions,
+        vehicleType: 'Car',
+        plate: 'ADMIN',
+        updatedAt: new Date().toISOString()
+      };
+
+      const existing = db.users.find(u => u.email.toLowerCase() === email);
+      if (existing) Object.assign(existing, record);
+      else db.users.push(record);
+
+      upsertToSheets('Users', 'email', record);
+      recordAudit('SUPERADMIN_ADMIN_SAVED', email, `Updated Admin permissions for ${email}`);
+      resetSuperAdminEditor();
+      renderSuperAdminTable();
+      showToast('Admin Account Saved', `${name} (${email}) permissions updated.`, 'success');
+    }
+
+    function loadAdminIntoSuperEditor(email) {
+      const a = db.users.find(x => x.email.toLowerCase() === email.toLowerCase());
+      if (!a) return;
+      const p = a.permissions || FULL_ADMIN_PERMS;
+      document.getElementById('sa-edit-orig-email').value = a.email;
+      document.getElementById('sa-input-name').value = a.name;
+      document.getElementById('sa-input-email').value = a.email;
+      document.getElementById('sa-input-mobile').value = a.mobile || '';
+      document.getElementById('sa-input-pass').value = a.password;
+      document.getElementById('perm-gate').checked = Boolean(p.gate);
+      document.getElementById('perm-slots').checked = Boolean(p.slots);
+      document.getElementById('perm-users').checked = Boolean(p.users);
+      document.getElementById('perm-cabs').checked = Boolean(p.cabs);
+      document.getElementById('perm-sheets').checked = Boolean(p.sheets);
+      document.getElementById('btn-save-sa').textContent = 'Update Admin Access';
+    }
+
+    function resetSuperAdminEditor() {
+      document.getElementById('sa-edit-orig-email').value = '';
+      document.getElementById('sa-input-name').value = '';
+      document.getElementById('sa-input-email').value = '';
+      document.getElementById('sa-input-mobile').value = '';
+      document.getElementById('sa-input-pass').value = '';
+      document.getElementById('perm-gate').checked = true;
+      document.getElementById('perm-slots').checked = true;
+      document.getElementById('perm-users').checked = true;
+      document.getElementById('perm-cabs').checked = true;
+      document.getElementById('perm-sheets').checked = true;
+      document.getElementById('btn-save-sa').textContent = 'Create / Update Admin Account';
+    }
+
+    function deleteAdminAccount(email) {
+      if (!currentUser || currentUser.role !== 'superadmin') return;
+      db.users = db.users.filter(u => u.email.toLowerCase() !== email.toLowerCase());
+      removeFromSheets('Users', 'email', email);
+      recordAudit('SUPERADMIN_ADMIN_DELETED', email, 'Removed Admin account');
+      renderSuperAdminTable();
+      showToast('Admin Removed', `Deleted admin account ${email}.`, 'info');
     }
 
     // Admin Cab Scheduling & Email Notification
     function renderAdminCabConsole() {
-      document.getElementById('cab-select-user').innerHTML = db.users
+      const usersForCab = db.users.filter(u => u.role === 'user');
+      document.getElementById('cab-select-user').innerHTML = usersForCab
         .map(u => `<option value="${u.email}">${u.name} (${u.email} • ${u.mobile || 'No Mobile'})</option>`)
         .join('');
 
@@ -1884,6 +2218,7 @@ function doPost(e) {
 
     function handleCabSchedule(e) {
       e.preventDefault();
+      if (!hasPerm('cabs')) return;
       const userEmail = document.getElementById('cab-select-user').value;
       const user = db.users.find(u => u.email === userEmail);
       const slotId = document.getElementById('cab-select-slot').value;
@@ -1962,6 +2297,7 @@ ${body}`;
     }
 
     function releaseScheduledCab(cabId, slotId) {
+      if (!hasPerm('cabs')) return;
       db.cabs = db.cabs.filter(c => c.cabId !== cabId);
       removeFromSheets('CabAllocations', 'cabId', cabId);
       adminFreeSlot(slotId);
@@ -1983,7 +2319,7 @@ ${body}`;
     }
 
     function openSheetsModal() {
-      if (!currentUser || currentUser.role !== 'admin') return;
+      if (!hasPerm('sheets')) return;
       document.getElementById('modal-sheets-url-input').value = getEndpoint();
       document.getElementById('pre-codegs-modal').textContent = APPS_SCRIPT_CODE;
       document.getElementById('modal-sheets-status').textContent = getEndpoint()
@@ -1997,13 +2333,13 @@ ${body}`;
     }
 
     async function saveSheetsUrlFromModal() {
-      if (!currentUser || currentUser.role !== 'admin') return;
+      if (!hasPerm('sheets')) return;
       const url = document.getElementById('modal-sheets-url-input').value.trim();
       await applySheetsUrl(url, 'modal-sheets-status');
     }
 
     async function saveSheetsUrlFromTab() {
-      if (!currentUser || currentUser.role !== 'admin') return;
+      if (!hasPerm('sheets')) return;
       const url = document.getElementById('tab-sheets-url-input').value.trim();
       await applySheetsUrl(url, 'tab-sheets-status');
     }
@@ -2071,7 +2407,7 @@ ${body}`;
           const u = JSON.parse(saved);
           const valid = db.users.find(x => String(x.email).toLowerCase() === String(u.email).toLowerCase());
           if (valid) {
-            currentUser = valid;
+            currentUser = normalizeUserRecord(valid);
             openAuthenticatedApp();
           }
         } catch (e) {}
