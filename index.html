@@ -33,7 +33,7 @@
   <div id="toast-container" class="fixed top-20 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none"></div>
 
   <!-- ========================================================================= -->
-  <!-- 1. AUTHENTICATION PORTAL (USER LOGIN & ADMIN LOGIN ONLY)                  -->
+  <!-- 1. HOME / AUTHENTICATION PORTAL (NO DATA SYNC OPTIONS ON HOME SCREEN)     -->
   <!-- ========================================================================= -->
   <div id="login-view" class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950">
     <div class="max-w-4xl w-full bg-white rounded-3xl shadow-2xl overflow-hidden grid grid-cols-1 md:grid-cols-12 border border-slate-800/40">
@@ -47,7 +47,7 @@
           </div>
           <h1 class="text-2xl font-extrabold tracking-tight leading-snug">Vehicle Parking Management System</h1>
           <p class="text-slate-400 text-xs mt-3 leading-relaxed">
-            Automated corporate parking slot allocation, real-time dual-QR gate verification, indoor lane guidance, office cab bay scheduling with email notifications, and live Google Sheets payload sync.
+            Automated corporate parking slot allocation, real-time dual-QR gate verification, indoor lane guidance, and office cab bay scheduling with email notifications.
           </p>
         </div>
 
@@ -102,13 +102,8 @@
           </button>
         </form>
 
-        <!-- Prominent Google Sheets & Apps Script Access on Login Footer -->
-        <div class="mt-6 pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-slate-500">
-          <span>Accounts are created exclusively by System Admin.</span>
-          <button type="button" onclick="openSheetsModal()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 font-extrabold transition cursor-pointer">
-            <span id="login-sheets-dot" class="w-2 h-2 rounded-full bg-amber-400"></span>
-            <span>Google Sheets Backend &amp; Code.gs</span>
-          </button>
+        <div class="mt-6 pt-4 border-t border-slate-100 text-[11px] text-slate-500 text-center">
+          Accounts are created exclusively by System Admin.
         </div>
       </div>
     </div>
@@ -127,7 +122,8 @@
           <div>
             <div class="flex items-center gap-2">
               <span class="font-extrabold text-sm sm:text-base tracking-tight">SmartFleet VPMS</span>
-              <span class="hidden sm:inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-slate-800 text-emerald-300 border border-slate-700">
+              <!-- Admin-Only Sync Status Badge -->
+              <span id="admin-header-sync-badge" class="view-hidden sm:inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-slate-800 text-emerald-300 border border-slate-700">
                 <span id="header-sync-dot" class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
                 <span id="header-sync-text">LOCAL + SHEETS</span>
               </span>
@@ -139,9 +135,9 @@
         <!-- Dynamic Navigation Tabs -->
         <nav id="top-nav-tabs" class="flex items-center gap-1.5 overflow-x-auto py-1"></nav>
 
-        <!-- Right User & Sheets Sync Controls -->
+        <!-- Right User & Admin-Only Sheets Sync Controls -->
         <div class="flex items-center gap-2 sm:gap-3">
-          <button type="button" onclick="openSheetsModal()" title="Configure Google Sheets & Apps Script Code.gs" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-400/40 text-xs font-extrabold transition cursor-pointer">
+          <button type="button" id="admin-header-sheets-btn" onclick="openSheetsModal()" title="Configure Google Sheets & Apps Script Code.gs" class="view-hidden inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-400/40 text-xs font-extrabold transition cursor-pointer">
             <span id="btn-sheets-dot" class="w-2 h-2 rounded-full bg-amber-400"></span>
             <span>Sheets Sync</span>
           </button>
@@ -299,7 +295,7 @@
       <section id="section-user-feedback" class="view-hidden max-w-2xl mx-auto">
         <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-4">
           <h2 class="text-lg font-extrabold text-slate-900">Parking &amp; Cab Service Feedback</h2>
-          <p class="text-xs text-slate-500">Share suggestions or report any issues; synced directly to Google Sheets.</p>
+          <p class="text-xs text-slate-500">Share suggestions or report any issues to the facility administrator.</p>
           <form onsubmit="handleFeedbackSubmit(event)" class="space-y-4">
             <div>
               <label class="block text-xs font-bold text-slate-700 mb-1">Experience Rating</label>
@@ -647,14 +643,14 @@
     <!-- Footer -->
     <footer class="bg-white border-t border-slate-200 py-4 px-6 text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-2">
       <span><strong>smartfleet.services</strong> &bull; Vehicle Parking Management System (VPMS)</span>
-      <button type="button" onclick="openSheetsModal()" class="text-emerald-700 font-bold hover:underline cursor-pointer">
+      <button type="button" id="admin-footer-sheets-btn" onclick="openSheetsModal()" class="view-hidden text-emerald-700 font-bold hover:underline cursor-pointer">
         Google Sheets &amp; Apps Script (Code.gs) Config
       </button>
     </footer>
   </div>
 
   <!-- ========================================================================= -->
-  <!-- 3. GOOGLE SHEETS & APPS SCRIPT MODAL (ACCESSIBLE FROM ANY SCREEN)         -->
+  <!-- 3. ADMIN-ONLY GOOGLE SHEETS & APPS SCRIPT MODAL                           -->
   <!-- ========================================================================= -->
   <div id="modal-sheets" class="view-hidden fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 sm:p-8 shadow-2xl space-y-5">
@@ -707,7 +703,7 @@
       </div>
       <div>
         <h3 class="text-lg font-extrabold text-slate-900">Confirm Slot <span id="modal-reserve-slot-id" class="text-emerald-700"></span></h3>
-        <p class="text-xs text-slate-500 mt-0.5">Verify your vehicle registration number to generate your Entry QR Pass and sync to Google Sheets.</p>
+        <p class="text-xs text-slate-500 mt-0.5">Verify your vehicle registration number to generate your Entry QR Pass.</p>
       </div>
       <form onsubmit="confirmSlotReservation(event)" class="space-y-4">
         <input type="hidden" id="modal-reserve-hidden-slot" />
@@ -959,11 +955,9 @@ function doPost(e) {
       const hDot = document.getElementById('header-sync-dot');
       const hTxt = document.getElementById('header-sync-text');
       const bDot = document.getElementById('btn-sheets-dot');
-      const lDot = document.getElementById('login-sheets-dot');
       if (hDot) hDot.className = `w-1.5 h-1.5 rounded-full ${dotClass}`;
       if (hTxt) hTxt.textContent = label;
       if (bDot) bDot.className = `w-2 h-2 rounded-full ${dotClass}`;
-      if (lDot) lDot.className = `w-2 h-2 rounded-full ${dotClass}`;
     }
 
     async function upsertToSheets(sheet, keyField, record) {
@@ -1001,7 +995,7 @@ function doPost(e) {
     async function pushAllToSheets(notify = false) {
       const url = getEndpoint();
       if (!url) {
-        if (notify) openSheetsModal();
+        if (notify && currentUser && currentUser.role === 'admin') openSheetsModal();
         return;
       }
       updateSheetsIndicators('PUSHING ALL...', 'bg-amber-400');
@@ -1059,7 +1053,7 @@ function doPost(e) {
 
     function manualPullFromSheets(notify = false) {
       if (!getEndpoint()) {
-        openSheetsModal();
+        if (currentUser && currentUser.role === 'admin') openSheetsModal();
         return;
       }
       pullFromSheets(true);
@@ -1149,7 +1143,15 @@ function doPost(e) {
       document.getElementById('topbar-user-role').textContent = currentUser.role.toUpperCase();
 
       const nav = document.getElementById('top-nav-tabs');
+      const adminSheetsBtn = document.getElementById('admin-header-sheets-btn');
+      const adminSyncBadge = document.getElementById('admin-header-sync-badge');
+      const adminFooterBtn = document.getElementById('admin-footer-sheets-btn');
+
       if (currentUser.role === 'admin') {
+        // Show Data Sync options ONLY inside Admin Login
+        adminSheetsBtn.classList.remove('view-hidden');
+        adminSyncBadge.classList.remove('view-hidden');
+        adminFooterBtn.classList.remove('view-hidden');
         nav.innerHTML = `
           <button type="button" onclick="openSection('section-admin-dashboard')" id="nav-section-admin-dashboard" class="px-3 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap cursor-pointer">Analytics &amp; QR Gate</button>
           <button type="button" onclick="openSection('section-admin-slots')" id="nav-section-admin-slots" class="px-3 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap cursor-pointer">Manage Slots</button>
@@ -1159,6 +1161,10 @@ function doPost(e) {
         `;
         openSection('section-admin-dashboard');
       } else {
+        // Strictly hide Data Sync options inside User Login
+        adminSheetsBtn.classList.add('view-hidden');
+        adminSyncBadge.classList.add('view-hidden');
+        adminFooterBtn.classList.add('view-hidden');
         nav.innerHTML = `
           <button type="button" onclick="openSection('section-user-parking')" id="nav-section-user-parking" class="px-3 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap cursor-pointer">Parking &amp; QR Pass</button>
           <button type="button" onclick="openSection('section-user-cabs')" id="nav-section-user-cabs" class="px-3 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap cursor-pointer">My Office Cab &amp; Inbox</button>
@@ -1172,11 +1178,18 @@ function doPost(e) {
       currentUser = null;
       localStorage.removeItem(ACTIVE_USER_KEY);
       if (timerHandle) clearInterval(timerHandle);
+      document.getElementById('admin-header-sheets-btn').classList.add('view-hidden');
+      document.getElementById('admin-header-sync-badge').classList.add('view-hidden');
+      document.getElementById('admin-footer-sheets-btn').classList.add('view-hidden');
+      document.getElementById('modal-sheets').classList.add('view-hidden');
       document.getElementById('app-shell').classList.add('view-hidden');
       document.getElementById('login-view').classList.remove('view-hidden');
     }
 
     function openSection(sectionId) {
+      if (sectionId.startsWith('section-admin-') && (!currentUser || currentUser.role !== 'admin')) {
+        return;
+      }
       const sections = [
         'section-user-parking', 'section-user-cabs', 'section-user-feedback',
         'section-admin-dashboard', 'section-admin-slots', 'section-admin-users', 'section-admin-cabs', 'section-admin-sheets'
@@ -1539,7 +1552,7 @@ function doPost(e) {
       upsertToSheets('Feedbacks', 'feedbackId', fb);
       recordAudit('FEEDBACK_ADDED', rating + '/5', `${currentUser.email}: ${comment.slice(0, 45)}`);
       document.getElementById('input-fb-comment').value = '';
-      showToast('Feedback Submitted', 'Saved to Google Sheets & audit log.', 'success');
+      showToast('Feedback Submitted', 'Thank you! Your feedback has been recorded.', 'success');
     }
 
     // ==================== ADMIN PORTAL FUNCTIONS ====================
@@ -1955,7 +1968,7 @@ ${body}`;
       renderAdminCabConsole();
     }
 
-    // ==================== GOOGLE SHEETS UI & CODE.GS CONTROLS ====================
+    // ==================== ADMIN-ONLY GOOGLE SHEETS UI & CODE.GS CONTROLS ====================
     function renderAdminSheetsTab() {
       const inp = document.getElementById('tab-sheets-url-input');
       const pre = document.getElementById('pre-codegs-tab');
@@ -1970,6 +1983,7 @@ ${body}`;
     }
 
     function openSheetsModal() {
+      if (!currentUser || currentUser.role !== 'admin') return;
       document.getElementById('modal-sheets-url-input').value = getEndpoint();
       document.getElementById('pre-codegs-modal').textContent = APPS_SCRIPT_CODE;
       document.getElementById('modal-sheets-status').textContent = getEndpoint()
@@ -1983,11 +1997,13 @@ ${body}`;
     }
 
     async function saveSheetsUrlFromModal() {
+      if (!currentUser || currentUser.role !== 'admin') return;
       const url = document.getElementById('modal-sheets-url-input').value.trim();
       await applySheetsUrl(url, 'modal-sheets-status');
     }
 
     async function saveSheetsUrlFromTab() {
+      if (!currentUser || currentUser.role !== 'admin') return;
       const url = document.getElementById('tab-sheets-url-input').value.trim();
       await applySheetsUrl(url, 'tab-sheets-status');
     }
